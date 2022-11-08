@@ -56,5 +56,5 @@ target_link_libraries(test_pointer_noswap
 enable_testing()
 
 add_test(NAME test_pointer_noswap
-        COMMAND bash ./run_test.sh $<TARGET_FILE:test_pointer_noswap>)
+        COMMAND bash ../run_test.sh $<TARGET_FILE:test_pointer_noswap>)
 
