@@ -645,7 +645,7 @@ FORCE_INLINE const T &DataFrameVector<T>::at(const DerefScope &scope,
 }
 
 template <typename T>
-FORCE_INLINE T DataFrameVector<T>::_nth_element(uint64_t begin, uint64_t len,
+T DataFrameVector<T>::_nth_element(uint64_t begin, uint64_t len,
                                                 uint64_t n) {
   uint64_t idx_pivot, idx_j;
   {

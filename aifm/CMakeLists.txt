@@ -11,9 +11,7 @@ link_directories(${SHENANGO_PATH}/bindings/cc)
 link_libraries(numa rt)
 
 aux_source_directory(src AIFM_SRCS)
-message("${AIFM_SRCS}")
 list(REMOVE_ITEM AIFM_SRCS "src/tcp_device_server.cpp")
-message("${AIFM_SRCS}")
 
 add_library(aifm STATIC ${AIFM_SRCS})
 target_include_directories(aifm
