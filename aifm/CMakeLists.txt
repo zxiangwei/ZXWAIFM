@@ -58,5 +58,5 @@ execute_process(COMMAND source shared.sh)
 execute_process(COMMAND source run_test.sh)
 
 add_test(NAME test_pointer_noswap
-        COMMAND run_single_test $<target_file:test_pointer_noswap>)
+        COMMAND run_single_test $<TARGET_FILE:test_pointer_noswap>)
 
