@@ -47,6 +47,7 @@ target_compile_definitions(aifm
 
 add_executable(test_pointer_noswap test/test_pointer_noswap.cpp)
 target_link_libraries(test_pointer_noswap
+        aifm
         numa
         rt++
         ${RUNTIME_LIBS}
