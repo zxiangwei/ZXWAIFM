@@ -53,3 +53,10 @@ target_link_libraries(test_pointer_noswap
         ${RUNTIME_LIBS}
         )
 
+enable_testing()
+execute_process(COMMAND source shared.sh)
+execute_process(COMMAND source run_test.sh)
+
+add_test(NAME test_pointer_noswap
+        COMMAND run_single_test $<target_file:test_pointer_noswap>)
+
