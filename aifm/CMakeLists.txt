@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.16)
 
 project(AIFM)
 
+set(SHENANGO_PATH ../shenango)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -D_GNU_SOURCE -std=gnu++2a -fconcepts -Wno-unused-function -Wno-subobject-linkage -march=native")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T $(SHENANGO_PATH)/base/base.ld")
-
-set(SHENANGO_PATH ../shenango)
 
 set(RUNTIME_LIBS
         runtime
