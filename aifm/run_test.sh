@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source shared.sh
+source ../shared.sh
 
 echo "Running test $1..."
 rerun_local_iokerneld
@@ -9,8 +9,8 @@ if [[ $1 == *"tcp"* ]]; then
 fi
 if run_program ./bin/$1 2>/dev/null | grep -q "Passed"; then
     say_passed
-    return 0
+    exit 0
 else
     say_failed
-    return 1
+    exit 1
 fi
