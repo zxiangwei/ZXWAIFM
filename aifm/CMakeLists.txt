@@ -45,6 +45,14 @@ target_compile_definitions(aifm
         DIRECTPATH
         )
 
+add_executable(tcp_device_server src/tcp_device_server.cpp)
+target_link_libraries(tcp_device_server
+        aifm
+        numa
+        rt++
+        ${RUNTIME_LIBS}
+        )
+
 add_executable(test_pointer_noswap test/test_pointer_noswap.cpp)
 target_link_libraries(test_pointer_noswap
         aifm
@@ -52,6 +60,7 @@ target_link_libraries(test_pointer_noswap
         rt++
         ${RUNTIME_LIBS}
         )
+add_dependencies(test_pointer_noswap tcp_device_server)
 
 enable_testing()
 
