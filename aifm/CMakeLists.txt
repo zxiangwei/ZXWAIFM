@@ -70,8 +70,14 @@ macro(aifm_test TARGET_NAME)
             COMMAND bash ../run_test.sh $<TARGET_FILE:${TARGET_NAME}>)
 endmacro()
 
-add_executable(test_pointer_noswap test/test_pointer_noswap.cpp)
-aifm_link(test_pointer_noswap)
-aifm_test(test_pointer_noswap)
+macro(aifm_link_test TARGET_NAME)
+    aifm_link(${TARGET_NAME})
+    aifm_test(${TARGET_NAME})
+endmacro()
 
-
+aux_source_directory(test TEST_SRCS)
+foreach(test_src ${TEST_SRCS})
+    string(REPLACE "test/" "" test_target_name ${test_src})
+    add_executable(${test_target_name} ${test_src})
+    aifm_link_test(${test_target_name})
+endforeach()
