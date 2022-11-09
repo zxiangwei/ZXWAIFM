@@ -66,10 +66,8 @@ macro(aifm_link TARGET_NAME)
 endmacro()
 
 macro(aifm_test TARGET_NAME)
-    set(TEST_NAME "${TARGET_NAME}_AIFMTEST")
-    add_test(NAME ${TEST_NAME}
+    add_test(NAME ${TARGET_NAME}
             COMMAND bash ../run_test.sh $<TARGET_FILE:${TARGET_NAME}>)
-    set_tests_properties(${TEST_NAME} PROPERTIES DEPENDS "${TARGET_NAME}")
 endmacro()
 
 macro(aifm_link_test TARGET_NAME)
