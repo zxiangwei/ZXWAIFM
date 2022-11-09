@@ -53,17 +53,25 @@ target_link_libraries(tcp_device_server
         ${RUNTIME_LIBS}
         )
 
-add_executable(test_pointer_noswap test/test_pointer_noswap.cpp)
-target_link_libraries(test_pointer_noswap
-        aifm
-        numa
-        rt++
-        ${RUNTIME_LIBS}
-        )
-add_dependencies(test_pointer_noswap tcp_device_server)
-
 enable_testing()
 
-add_test(NAME test_pointer_noswap
-        COMMAND bash ../run_test.sh $<TARGET_FILE:test_pointer_noswap>)
+macro(aifm_link TARGET_NAME)
+    target_link_libraries(${TARGET_NAME}
+            aifm
+            numa
+            rt++
+            ${RUNTIME_LIBS}
+            )
+    add_dependencies(${TARGET_NAME} tcp_device_server)
+endmacro()
+
+macro(aifm_test TARGET_NAME)
+    add_test(NAME ${TARGET_NAME}
+            COMMAND bash ../run_test.sh $<TARGET_FILE:${TARGET_NAME}>)
+endmacro()
+
+add_executable(test_pointer_noswap test/test_pointer_noswap.cpp)
+aifm_link(test_pointer_noswap)
+aifm_test(test_pointer_noswap)
+
 
