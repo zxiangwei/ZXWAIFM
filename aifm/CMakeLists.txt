@@ -77,7 +77,7 @@ endmacro()
 
 aux_source_directory(test TEST_SRCS)
 foreach(test_src ${TEST_SRCS})
-    string(REPLACE "test/" "" test_target_name ${test_src})
+    get_filename_component(test_target_name ${test_src} NAME_WE)
     add_executable(${test_target_name} ${test_src})
     aifm_link_test(${test_target_name})
 endforeach()
