@@ -76,7 +76,7 @@ macro(aifm_link_test TARGET_NAME)
 endmacro()
 
 aux_source_directory(test TEST_SRCS)
-list(REMOVE_ITEM TEST_SRCS "test/tcp_ht_client.cpp")
+list(REMOVE_ITEM TEST_SRCS "test/test_ht_client.cpp")
 foreach(test_src ${TEST_SRCS})
     get_filename_component(test_target_name ${test_src} NAME_WE)
     add_executable(${test_target_name} ${test_src})

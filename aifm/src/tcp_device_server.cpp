@@ -266,7 +266,7 @@ void master_fn(tcpconn_t *c) {
 
   helpers::tcp_read_until(c, &opcode, TCPDevice::kOpcodeSize);
   BUG_ON(opcode != TCPDevice::kOpShutdown);
-  process_shutdown(c);
+  process_shutdown(c);  // 等待所有子线程断开连接
   tcp_close(c);
   has_shutdown = true;
 }

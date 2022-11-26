@@ -81,10 +81,10 @@ function kill_mem_server {
 }
 
 function run_mem_server {
-    ssh_execute "sudo $SHENANGO_PATH/iokerneld simple" > /dev/null 2>&1 &
+    ssh_execute "sudo ~/AIFM/shenango/iokerneld simple" > /dev/null 2>&1 &
     sleep 3
     ssh_execute_tty "sudo sh -c 'ulimit -s $MEM_SERVER_STACK_KB; \
-                     tcp_device_server $AIFM_PATH/configs/server.config \
+                     ~/AIFM/aifm/bin/tcp_device_server ~/AIFM/aifm/configs/server.config \
                      $MEM_SERVER_PORT'" > /dev/null 2>&1 &
     sleep 3
 }
@@ -112,9 +112,11 @@ function run_single_test {
   fi
   if run_program $1 2>/dev/null | grep -q "Passed"; then
       say_passed
+      kill_local_iokerneld
       return 0
   else
       say_failed
+      kill_local_iokerneld
       return 1
   fi
 }
