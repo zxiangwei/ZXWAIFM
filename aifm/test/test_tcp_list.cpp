@@ -15,7 +15,7 @@ using namespace far_memory;
 constexpr uint64_t kCacheSize = (128ULL << 20);
 constexpr uint64_t kFarMemSize = (4ULL << 30);
 constexpr uint32_t kNumGCThreads = 12;
-constexpr int kListSize = 10000000;
+constexpr int kListSize = 1000000;
 constexpr static uint32_t kNumConnections = 300;
 
 void do_work(FarMemManager *manager) {
@@ -32,9 +32,8 @@ void do_work(FarMemManager *manager) {
     int val = iter.deref(scope);
   }
   auto end = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> diff = end - start;
   std::ofstream ofs("time.txt");
-  ofs << diff.count() << " s\n";
+  ofs << (end - start).count() << std::endl;
   std::cout << "Passed" << std::endl;
 }
 
