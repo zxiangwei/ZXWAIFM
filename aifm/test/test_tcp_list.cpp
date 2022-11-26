@@ -12,7 +12,7 @@ extern "C" {
 
 using namespace far_memory;
 
-constexpr uint64_t kCacheSize = (128ULL << 10);
+constexpr uint64_t kCacheSize = (128ULL << 20);
 constexpr uint64_t kFarMemSize = (4ULL << 30);
 constexpr uint32_t kNumGCThreads = 12;
 constexpr int kListSize = 10000000;
