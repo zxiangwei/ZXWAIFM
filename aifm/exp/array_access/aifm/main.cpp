@@ -49,6 +49,9 @@ void fm_array_bench() {
   string out_str;
   init_array();
   array_ptr->disable_prefetch();
+
+  std::cout << "start benching" << std::endl;
+
   auto start = chrono::steady_clock::now();
 
   for (int i = 0; i < kLoopTimes; ++i) {
