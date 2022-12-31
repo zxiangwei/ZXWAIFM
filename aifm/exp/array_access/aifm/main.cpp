@@ -20,12 +20,12 @@ extern "C" {
 
 using namespace far_memory;
 
-constexpr uint64_t kCacheSize = 22432 * Region::kSize;
+constexpr uint64_t kCacheSize = 64 * Region::kSize;
 constexpr uint64_t kFarMemSize = 20ULL << 30;
 constexpr uint64_t kNumGCThreads = 15;
 constexpr uint64_t kNumConnections = 600;
-constexpr uint64_t kArrayLen = 100000;
-constexpr int kLoopTimes = 1000;
+constexpr uint64_t kArrayLen = 1000000;
+constexpr int kLoopTimes = 100000;
 
 using namespace std;
 
@@ -41,11 +41,12 @@ void init_array() {
 void fm_array_bench() {
   string out_str;
   init_array();
+  array_ptr->disable_prefetch();
   auto start = chrono::steady_clock::now();
 
   for (int i = 0; i < kLoopTimes; ++i) {
     long long result = 0;
-    int step = kArrayLen / 100;
+    int step = kArrayLen / 1000;
     for (int j = 0; j < kArrayLen; j += step) {
       result += array_ptr->read(j);
     }
