@@ -24,7 +24,7 @@ constexpr uint64_t kCacheSize = 128 * Region::kSize;
 constexpr uint64_t kFarMemSize = 20ULL << 30;
 constexpr uint64_t kNumGCThreads = 15;
 constexpr uint64_t kNumConnections = 600;
-constexpr uint64_t kArrayLen = 1000000;
+constexpr uint64_t kArrayLen = 100000;
 constexpr int kLoopTimes = 1000;
 
 using namespace std;
