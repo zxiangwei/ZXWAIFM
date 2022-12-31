@@ -24,8 +24,8 @@ constexpr uint64_t kCacheSize = 128 * Region::kSize;
 constexpr uint64_t kFarMemSize = 20ULL << 30;
 constexpr uint64_t kNumGCThreads = 15;
 constexpr uint64_t kNumConnections = 600;
-constexpr uint64_t kArrayLen = 100000;
-constexpr int kLoopTimes = 1000;
+constexpr uint64_t kArrayLen = 10000;
+constexpr int kLoopTimes = 100;
 
 using namespace std;
 
@@ -55,7 +55,7 @@ void fm_array_bench() {
   auto start = chrono::steady_clock::now();
 
   for (int i = 0; i < kLoopTimes; ++i) {
-    int step = kArrayLen / 1000;
+    int step = kArrayLen / 100;
     for (int j = 0; j < kArrayLen; j += step) {
       BigObject obj = array_ptr->read(j);
       DONT_OPTIMIZE(obj);
