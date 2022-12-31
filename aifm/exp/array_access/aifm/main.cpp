@@ -20,21 +20,28 @@ extern "C" {
 
 using namespace far_memory;
 
-constexpr uint64_t kCacheSize = 64 * Region::kSize;
+constexpr uint64_t kCacheSize = 128 * Region::kSize;
 constexpr uint64_t kFarMemSize = 20ULL << 30;
 constexpr uint64_t kNumGCThreads = 15;
 constexpr uint64_t kNumConnections = 600;
 constexpr uint64_t kArrayLen = 1000000;
-constexpr int kLoopTimes = 100000;
+constexpr int kLoopTimes = 1000;
 
 using namespace std;
 
-std::unique_ptr<Array<int, kArrayLen>> array_ptr;
+class BigObject {
+ public:
+  BigObject() = default;
+ private:
+  int arr_[1024];
+};
+
+std::unique_ptr<Array<BigObject, kArrayLen>> array_ptr;
 
 void init_array() {
   for (int i = 0; i < kArrayLen; i++) {
     DerefScope scope;
-    array_ptr->write(i, i);
+    array_ptr->write(BigObject(), i);
   }
 }
 
@@ -45,12 +52,11 @@ void fm_array_bench() {
   auto start = chrono::steady_clock::now();
 
   for (int i = 0; i < kLoopTimes; ++i) {
-    long long result = 0;
     int step = kArrayLen / 1000;
     for (int j = 0; j < kArrayLen; j += step) {
-      result += array_ptr->read(j);
+      BigObject obj = array_ptr->read(j);
+      DONT_OPTIMIZE(obj);
     }
-    DONT_OPTIMIZE(result);
   }
 
   auto end = chrono::steady_clock::now();
@@ -63,7 +69,7 @@ void do_work(netaddr raddr) {
   auto manager = std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
       kCacheSize, kNumGCThreads,
       new TCPDevice(raddr, kNumConnections, kFarMemSize)));
-  array_ptr.reset( manager->allocate_array_heap<int, kArrayLen>());
+  array_ptr.reset( manager->allocate_array_heap<BigObject, kArrayLen>());
   fm_array_bench();
 
   std::cout << "Force existing..." << std::endl;
