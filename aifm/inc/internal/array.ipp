@@ -87,8 +87,13 @@ template <bool Nt, typename... Indices>
 FORCE_INLINE const T &Array<T, Dims...>::at(const DerefScope &scope,
                                             Indices... indices) noexcept {
   auto idx = get_flat_idx(indices...);
+  if (lru_cache_.has(idx)) {
+    return lru_cache_.get(idx);
+  }
   auto ptr = reinterpret_cast<UniquePtr<T> *>(GenericArray::at(Nt, idx));
-  return *(ptr->template deref<Nt>(scope));
+  auto deref_ptr = ptr->template deref<Nt>(scope);
+  lru_cache_.set(idx, *deref_ptr);
+  return *deref_ptr;
 }
 
 template <typename T, uint64_t... Dims>
@@ -118,6 +123,9 @@ template <bool Nt, typename... Indices>
 FORCE_INLINE T &Array<T, Dims...>::at_mut(const DerefScope &scope,
                                           Indices... indices) noexcept {
   auto idx = get_flat_idx(indices...);
+  if (lru_cache_.has(idx)) {
+    lru_cache_.remove(idx);
+  }
   auto ptr = reinterpret_cast<UniquePtr<T> *>(GenericArray::at(Nt, idx));
   return *(ptr->template deref_mut<Nt>(scope));
 }
@@ -137,6 +145,8 @@ FORCE_INLINE void Array<T, Dims...>::write(U &&u, Indices... indices) {
                 "U must be the same as T");
   DerefScope scope;
   at_mut(scope, indices...) = u;
+  auto idx = get_flat_idx(indices...);
+  lru_cache_.set(idx, u);
 }
 
 template <typename T, uint64_t... Dims>

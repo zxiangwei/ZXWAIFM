@@ -3,6 +3,7 @@
 #include "deref_scope.hpp"
 #include "pointer.hpp"
 #include "prefetcher.hpp"
+#include "lru_cache.hpp"
 
 #include <cstdint>
 #include <limits>
@@ -73,6 +74,10 @@ private:
   static constexpr uint64_t _size(uint64_t N, Args... rest_dims) {
     return N * _size(rest_dims...);
   }
+
+  static constexpr int kLRUCacheSize = 10;
+
+  LRUCache<int, T> lru_cache_{kLRUCacheSize};
 
 public:
   static constexpr uint64_t kSize = _size(Dims...);
