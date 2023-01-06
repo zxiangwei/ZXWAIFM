@@ -19,7 +19,7 @@ extern "C" {
 #include <string>
 #include <unistd.h>
 
-constexpr uint64_t kCacheSize = 22432 * Region::kSize;
+constexpr uint64_t kCacheSize = 256 * Region::kSize;
 constexpr uint64_t kFarMemSize = 20ULL << 30;
 constexpr uint64_t kNumGCThreads = 15;
 constexpr uint64_t kNumConnections = 600;
@@ -51,9 +51,9 @@ void flush_cache() {
       ACCESS_ONCE(file_block.data[0]);
     }
   }
-//  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
-//    fm_array_ptrs[k]->enable_prefetch();
-//  }
+  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
+    fm_array_ptrs[k]->enable_prefetch();
+  }
 }
 
 void read_files_to_fm_array(const string &in_file_path) {

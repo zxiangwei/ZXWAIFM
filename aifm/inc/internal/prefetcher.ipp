@@ -54,34 +54,38 @@ Prefetcher<InduceFn, InferFn, MappingFn>::generate_prefetch_tasks() {
       return;
     }
     num_objs_to_prefetch--;
-    GenericUniquePtr *task = mapper(state_, next_prefetch_idx_);
+    Index_t tmp_idx = next_prefetch_idx_;
     next_prefetch_idx_ = inferer(next_prefetch_idx_, pattern_);
-    if (!task) {
-      continue;
-    }
-    bool dispatched = false;
-    std::optional<uint32_t> inactive_slave_id = std::nullopt;
-    for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
-      auto &status = slave_status_[i].data;
-      if (status.cv.HasWaiters()) {
-        inactive_slave_id = i;
+    for (uint32_t j = 0; j < kPrefetchNum; ++j) {
+      GenericUniquePtr *task = mapper(state_, tmp_idx);
+      tmp_idx = inferer(tmp_idx, pattern_);
+      if (!task) {
         continue;
       }
-      if (ACCESS_ONCE(status.task) == nullptr) {
-        ACCESS_ONCE(status.task) = task;
-        dispatched = true;
-        break;
+      bool dispatched = false;
+      std::optional<uint32_t> inactive_slave_id = std::nullopt;
+      for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
+        auto &status = slave_status_[i].data;
+        if (status.cv.HasWaiters()) {
+          inactive_slave_id = i;
+          continue;
+        }
+        if (ACCESS_ONCE(status.task) == nullptr) {
+          ACCESS_ONCE(status.task) = task;
+          dispatched = true;
+          break;
+        }
       }
-    }
-    if (!dispatched) {
-      if (likely(inactive_slave_id)) {
-        auto &status = slave_status_[*inactive_slave_id].data;
-        status.task = task;
-        wmb();
-        status.cv.Signal();
-      } else {
-        DerefScope scope;
-        task->swap_in(nt_);
+      if (!dispatched) {
+        if (likely(inactive_slave_id)) {
+          auto &status = slave_status_[*inactive_slave_id].data;
+          status.task = task;
+          wmb();
+          status.cv.Signal();
+        } else {
+          DerefScope scope;
+          task->swap_in(nt_);
+        }
       }
     }
   }
