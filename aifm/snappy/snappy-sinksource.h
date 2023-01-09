@@ -35,6 +35,7 @@
 #include <cstdint>
 #include <memory>
 #include <stddef.h>
+#include <iostream>
 
 using namespace far_memory;
 

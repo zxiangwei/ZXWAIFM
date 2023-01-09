@@ -4,7 +4,7 @@
 
 #include <optional>
 
-#define PREFECHER_LEAP_LOG 0
+//#define PREFECHER_LEAP_LOG 1
 
 #ifdef PREFECHER_LEAP
 #include <iostream>
