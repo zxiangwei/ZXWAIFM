@@ -1007,6 +1007,8 @@ size_t Compress(Source* reader, Sink* writer) {
 
   internal::WorkingMemory wmem(N);
 
+  int idx_n = 0;
+
   while (N > 0) {
     // Get next block to compress (without copying if possible)
     size_t fragment_size;
@@ -1058,6 +1060,15 @@ size_t Compress(Source* reader, Sink* writer) {
     written += (end - dest);
 
     N -= num_to_read;
+
+    ++idx_n;
+    if (idx_n % 3 == 2) {
+      if (N >= num_to_read) {
+        reader->Skip(num_to_read);
+        N -= num_to_read;
+      }
+    }
+
     reader->Skip(pending_advance);
   }
 

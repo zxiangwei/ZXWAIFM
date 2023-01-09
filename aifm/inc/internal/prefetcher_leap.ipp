@@ -6,6 +6,8 @@
 
 namespace far_memory {
 
+namespace leap {
+
 template <typename InduceFn, typename InferFn, typename MappingFn>
 FORCE_INLINE Prefetcher<InduceFn, InferFn, MappingFn>::Prefetcher(
     FarMemDevice *device, uint8_t *state, uint32_t object_data_size)
@@ -109,7 +111,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_slave_fn(uint32_t tid) {
     } else {
       auto start_us = microtime();
       while (ACCESS_ONCE(*task_ptr) == nullptr &&
-             microtime() - start_us <= kMaxSlaveWaitUs) {
+          microtime() - start_us <= kMaxSlaveWaitUs) {
         cpu_relax();
       }
       if (unlikely(ACCESS_ONCE(*task_ptr) == nullptr)) {
@@ -138,7 +140,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
         continue;
       }
       auto new_pattern = inducer(last_idx_, idx);
-      if (pattern_ != new_pattern) {
+      if (!bm_vote_.IsMode(new_pattern)) {
         hit_times_ = num_objs_to_prefetch = 0;
       } else if (++hit_times_ >= kHitTimesThresh) {
         if (unlikely(hit_times_ == kHitTimesThresh)) {
@@ -192,5 +194,7 @@ FORCE_INLINE void
 Prefetcher<InduceFn, InferFn, MappingFn>::update_state(uint8_t *state) {
   ACCESS_ONCE(state_) = state;
 }
+
+} // namespace leap
 
 } // namespace far_memory

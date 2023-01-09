@@ -1,5 +1,7 @@
 #pragma once
 
+#include "boyer_moore_vote.hpp"
+
 #include "sync.h"
 #include "thread.h"
 
@@ -13,9 +15,11 @@ namespace far_memory {
 
 class FarMemDevice;
 
-template <typename InduceFn, typename InferFn, typename MappingFn>
+namespace leap {
+
+template<typename InduceFn, typename InferFn, typename MappingFn>
 class Prefetcher {
-private:
+ private:
   using InduceFnTraits = helpers::FunctionTraits<InduceFn>;
   using InferFnTraits = helpers::FunctionTraits<InferFn>;
   using MappingFnTraits = helpers::FunctionTraits<MappingFn>;
@@ -32,7 +36,7 @@ private:
   // InferFn: (Index_t, Pattern_t)->Index_t
   static_assert(InferFnTraits::Arity == 2);
   static_assert(std::is_same<
-                Index_t, typename InferFnTraits::template Arg<0>::Type>::value);
+      Index_t, typename InferFnTraits::template Arg<0>::Type>::value);
   static_assert(
       std::is_same<Pattern_t,
                    typename InferFnTraits::template Arg<1>::Type>::value);
@@ -61,6 +65,8 @@ private:
     bool is_exited;
     rt::CondVar cv;
   };
+
+  BoyerMooreVote<Pattern_t> bm_vote_;
 
   constexpr static uint32_t kIdxTracesSize = 256;
   constexpr static uint32_t kHitTimesThresh = 8;
@@ -92,7 +98,7 @@ private:
   void prefetch_master_fn();
   void prefetch_slave_fn(uint32_t tid);
 
-public:
+ public:
   Prefetcher(FarMemDevice *device, uint8_t *state, uint32_t object_data_size);
   ~Prefetcher();
   NOT_COPYABLE(Prefetcher);
@@ -101,6 +107,9 @@ public:
   void static_prefetch(Index_t start_idx, Pattern_t pattern, uint32_t num);
   void update_state(uint8_t *state);
 };
+
+} // namespace leap
+
 } // namespace far_memory
 
-#include "internal/prefetcher.ipp"
+#include "internal/prefetcher_leap.ipp"

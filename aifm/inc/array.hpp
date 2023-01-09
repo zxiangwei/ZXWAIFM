@@ -3,6 +3,7 @@
 #include "deref_scope.hpp"
 #include "pointer.hpp"
 #include "prefetcher.hpp"
+#include "prefetcher_leap.hpp"
 
 #include <cstdint>
 #include <limits>
