@@ -18,7 +18,7 @@ class BoyerMooreVote {
         --count_;
       }
     }
-    return (count_ == 0);
+    return false;
   }
 
  private:
