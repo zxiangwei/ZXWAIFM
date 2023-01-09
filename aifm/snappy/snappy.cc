@@ -1010,6 +1010,8 @@ size_t Compress(Source* reader, Sink* writer) {
 
   int idx_n = 0;
 
+  std::cout << "start compress" << std::endl;
+
   while (N > 0) {
     // Get next block to compress (without copying if possible)
     size_t fragment_size;
