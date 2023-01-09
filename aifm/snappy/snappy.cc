@@ -29,7 +29,7 @@
 #include "snappy.h"
 #include "snappy-internal.h"
 #include "snappy-sinksource.h"
-#include <iostream>
+//#include <iostream>
 
 #if !defined(SNAPPY_HAVE_SSSE3)
 // __SSSE3__ is defined by GCC and Clang. Visual Studio doesn't target SIMD
@@ -1010,7 +1010,7 @@ size_t Compress(Source* reader, Sink* writer) {
 
   int idx_n = 0;
 
-  std::cout << "start compress" << std::endl;
+//  std::cout << "start compress" << std::endl;
 
   while (N > 0) {
     // Get next block to compress (without copying if possible)
@@ -1067,7 +1067,7 @@ size_t Compress(Source* reader, Sink* writer) {
     ++idx_n;
     if (idx_n % 3 == 2) {
       if (N >= num_to_read) {
-        std::cout << idx_n << " skip " << num_to_read << std::endl;
+//        std::cout << idx_n << " skip " << num_to_read << std::endl;
         reader->Skip(num_to_read);
         N -= num_to_read;
       }
