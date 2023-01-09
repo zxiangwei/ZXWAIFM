@@ -3,6 +3,7 @@
 #include "device.hpp"
 
 #include <optional>
+#include <iostream>
 
 namespace far_memory {
 
@@ -57,6 +58,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::generate_prefetch_tasks() {
     Index_t tmp_idx = next_prefetch_idx_;
     next_prefetch_idx_ = inferer(next_prefetch_idx_, pattern_);
     for (uint32_t j = 0; j < kPrefetchNum; ++j) {
+      std::cout << "prefetch " << tmp_idx << std::endl;
       GenericUniquePtr *task = mapper(state_, tmp_idx);
       tmp_idx = inferer(tmp_idx, pattern_);
       if (!task) {
@@ -139,8 +141,10 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
       }
       auto new_pattern = inducer(last_idx_, idx);
       if (pattern_ != new_pattern) {
+        std::cout << new_pattern << " mismatch" << std::endl;
         hit_times_ = num_objs_to_prefetch = 0;
       } else if (++hit_times_ >= kHitTimesThresh) {
+        std::cout << new_pattern << " match" << std::endl;
         if (unlikely(hit_times_ == kHitTimesThresh)) {
           next_prefetch_idx_ = inferer(idx, pattern_);
           num_objs_to_prefetch = kPrefetchWinSize_;
