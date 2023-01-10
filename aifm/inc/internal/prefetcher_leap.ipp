@@ -66,7 +66,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::generate_prefetch_tasks() {
     next_prefetch_idx_ = inferer(next_prefetch_idx_, pattern_);
     for (uint32_t j = 0; j < kPrefetchNum; ++j) {
 #ifdef PREFECHER_LEAP_LOG
-      std::cout << "prefetch " << tmp_idx << std::endl;
+      printf("prefetch(%ld)\n", tmp_idx);
 #endif
       GenericUniquePtr *task = mapper(state_, tmp_idx);
       tmp_idx = inferer(tmp_idx, pattern_);
@@ -151,12 +151,12 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
       auto new_pattern = inducer(last_idx_, idx);
       if (!bm_vote_.IsMode(new_pattern)) {
 #ifdef PREFECHER_LEAP_LOG
-        std::cout << new_pattern << " mismatch" << std::endl;
+        printf("mismatch(%ld)\n", new_pattern);
 #endif
         hit_times_ = num_objs_to_prefetch = 0;
       } else if (++hit_times_ >= kHitTimesThresh) {
 #ifdef PREFECHER_LEAP_LOG
-        std::cout << new_pattern << " match" << std::endl;
+        printf("match(%ld)\n", new_pattern);
 #endif
         if (unlikely(hit_times_ == kHitTimesThresh)) {
           next_prefetch_idx_ = inferer(idx, pattern_);

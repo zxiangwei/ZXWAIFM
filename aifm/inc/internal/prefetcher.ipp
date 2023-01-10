@@ -64,7 +64,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::generate_prefetch_tasks() {
     next_prefetch_idx_ = inferer(next_prefetch_idx_, pattern_);
     for (uint32_t j = 0; j < kPrefetchNum; ++j) {
 #ifdef PREFECHER_LOG
-      printf("prefetch(%d)\n", tmp_idx);
+      printf("prefetch(%ld)\n", tmp_idx);
 #endif
       GenericUniquePtr *task = mapper(state_, tmp_idx);
       tmp_idx = inferer(tmp_idx, pattern_);
@@ -149,12 +149,12 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
       auto new_pattern = inducer(last_idx_, idx);
       if (pattern_ != new_pattern) {
 #ifdef PREFECHER_LOG
-        printf("mismatch(%d %d)\n", pattern_, new_pattern);
+        printf("mismatch(%ld %ld)\n", pattern_, new_pattern);
 #endif
         hit_times_ = num_objs_to_prefetch = 0;
       } else if (++hit_times_ >= kHitTimesThresh) {
 #ifdef PREFECHER_LOG
-        printf("match(%d)\n", new_pattern);
+        printf("match(%ld)\n", new_pattern);
 #endif
         if (unlikely(hit_times_ == kHitTimesThresh)) {
           next_prefetch_idx_ = inferer(idx, pattern_);
@@ -186,6 +186,9 @@ Prefetcher<InduceFn, InferFn, MappingFn>::add_trace(bool nt, Index_t idx) {
   // The goal is to make it extremely short and fast, therefore not compromising
   // the mutator performance when prefetching is enabled. The most overheads are
   // transferred to the backend prefetching threads.
+#ifdef PREFECHER_LOG
+  printf("add_trace(%ld)\n", idx);
+#endif
   traces_[traces_tail_++] = {
       .counter = ++traces_counter_, .idx = idx, .nt = nt};
   traces_tail_ %= kIdxTracesSize;
