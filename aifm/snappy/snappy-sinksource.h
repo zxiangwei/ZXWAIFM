@@ -232,7 +232,7 @@ const char *FarMemArraySource<kNumBlocks, TpAPI>::Peek(size_t *len) {
   auto block_offset = idx_ % FileBlock::kSize;
   char *block_ptr;
 
-  std::cout << "read block " << block_id << " offset " << block_offset << std::endl;
+//  std::cout << "read block " << block_id << " offset " << block_offset << std::endl;
 
   if constexpr (TpAPI) {
     block_ = fm_array_ptr_->read(block_id);
