@@ -4,7 +4,7 @@
 
 #include <optional>
 
-//#define PREFECHER_LOG 1
+#define PREFECHER_LOG 1
 
 #ifdef PREFECHER_LOG
 #include <iostream>
@@ -149,7 +149,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
       auto new_pattern = inducer(last_idx_, idx);
       if (pattern_ != new_pattern) {
 #ifdef PREFECHER_LOG
-        std::cout << new_pattern << " mismatch" << std::endl;
+        std::cout << pattern_ << " " <<  new_pattern << " mismatch" << std::endl;
 #endif
         hit_times_ = num_objs_to_prefetch = 0;
       } else if (++hit_times_ >= kHitTimesThresh) {
