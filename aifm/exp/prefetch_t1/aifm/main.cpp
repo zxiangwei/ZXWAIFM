@@ -52,9 +52,9 @@ void flush_cache() {
       ACCESS_ONCE(file_block.data[0]);
     }
   }
-  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
-    fm_array_ptrs[k]->enable_prefetch();
-  }
+//  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
+//    fm_array_ptrs[k]->enable_prefetch();
+//  }
 }
 
 void read_files_to_fm_array(const string &in_file_path) {
@@ -99,7 +99,7 @@ template<uint64_t kNumBlocks, bool TpAPI>
 void do_something(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
                   size_t input_length, std::string *compressed) {
 //  snappy::FarMemArraySource<kNumBlocks, TpAPI> reader(input_length, fm_array_ptr);
-  for (int i = 0; i < kNumBlocks; ++i) {
+  for (uint64_t i = 0; i < kNumBlocks; ++i) {
     auto block = fm_array_ptr->read(i);
     DONT_OPTIMIZE(block);
     std::this_thread::sleep_for(std::chrono::microseconds(100));
