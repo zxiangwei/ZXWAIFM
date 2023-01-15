@@ -17,6 +17,7 @@ extern "C" {
 #include <iostream>
 #include <streambuf>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 constexpr uint64_t kCacheSize = 256 * Region::kSize;
@@ -98,7 +99,10 @@ template<uint64_t kNumBlocks, bool TpAPI>
 void do_something(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
                   size_t input_length, std::string *compressed) {
 //  snappy::FarMemArraySource<kNumBlocks, TpAPI> reader(input_length, fm_array_ptr);
-
+  for (int i = 0; i < kNumBlocks; ++i) {
+    auto block = fm_array_ptr->read(i);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 }
 
 void fm_compress_files_bench(const string &in_file_path,
@@ -108,7 +112,9 @@ void fm_compress_files_bench(const string &in_file_path,
   auto start = chrono::steady_clock::now();
   for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
     std::cout << "Compressing file " << i << std::endl;
-    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
         fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
   }
   auto end = chrono::steady_clock::now();
