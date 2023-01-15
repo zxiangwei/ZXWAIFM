@@ -101,6 +101,7 @@ void do_something(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
 //  snappy::FarMemArraySource<kNumBlocks, TpAPI> reader(input_length, fm_array_ptr);
   for (int i = 0; i < kNumBlocks; ++i) {
     auto block = fm_array_ptr->read(i);
+    DONT_OPTIMIZE(block);
     std::this_thread::sleep_for(std::chrono::microseconds(100));
   }
 }
