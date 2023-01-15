@@ -69,11 +69,11 @@ class Prefetcher {
   BoyerMooreVote<Pattern_t> bm_vote_;
 
   constexpr static uint32_t kIdxTracesSize = 256;
-  constexpr static uint32_t kHitTimesThresh = 2;
+  constexpr static uint32_t kHitTimesThresh = 8;
   constexpr static uint32_t kGenTasksBurstSize = 8;
   constexpr static uint32_t kMaxSlaveWaitUs = 5;
   constexpr static uint32_t kMaxNumPrefetchSlaveThreads = 16;
-  constexpr static uint32_t kPrefetchNum = 1;
+  constexpr static uint32_t kPrefetchNum = 1000;
 
   const uint32_t kPrefetchWinSize_; // In terms of number of objects.
   uint8_t *state_;
