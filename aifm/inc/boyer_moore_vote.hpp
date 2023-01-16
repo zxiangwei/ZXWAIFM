@@ -7,11 +7,11 @@ class BoyerMooreVote {
 
   bool IsMode(T elem) {
     if (count_ == 0) {
-      mode_ = elem;
+      majority_ = elem;
       ++count_;
       return true;
     } else {
-      if (mode_ == elem) {
+      if (majority_ == elem) {
         ++count_;
         return true;
       } else {
@@ -22,6 +22,6 @@ class BoyerMooreVote {
   }
 
  private:
-  T mode_;  // 众数
+  T majority_;  // 众数
   int count_{0};
 };
