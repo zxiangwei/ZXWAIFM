@@ -112,7 +112,7 @@ void bench_farmem_load(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
                   size_t input_length, std::string *compressed) {
 //  snappy::FarMemArraySource<kNumBlocks, TpAPI> reader(input_length, fm_array_ptr);
   fm_array_ptr->disable_prefetch();
-  for (uint64_t i = 0; i < kNumBlocks; ++i) {
+  for (uint64_t i = 0; i < 100; ++i) {
     auto block = fm_array_ptr->read(i);
     DONT_OPTIMIZE(block);
 //    std::this_thread::sleep_for(std::chrono::microseconds(100));
