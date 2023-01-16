@@ -73,7 +73,7 @@ class Prefetcher {
   constexpr static uint32_t kGenTasksBurstSize = 8;
   constexpr static uint32_t kMaxSlaveWaitUs = 5;
   constexpr static uint32_t kMaxNumPrefetchSlaveThreads = 16;
-  constexpr static uint32_t kPrefetchNum = 16;
+  constexpr static uint32_t kPrefetchNum = 1;
 
   const uint32_t kPrefetchWinSize_; // In terms of number of objects.
   uint8_t *state_;
