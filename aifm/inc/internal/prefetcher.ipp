@@ -163,7 +163,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
           num_objs_to_prefetch++;
         }
       } else {
-        num_objs_to_prefetch++;
+        num_objs_to_prefetch = kPrefetchWinSize_;
       }
       pattern_ = new_pattern;
       last_idx_ = idx;
