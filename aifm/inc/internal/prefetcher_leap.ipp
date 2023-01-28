@@ -166,7 +166,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
         }
       } else {
         next_prefetch_idx_ = inferer(idx, pattern_);
-        num_objs_to_prefetch = kPrefetchWinSize_;
+        num_objs_to_prefetch = 1;
       }
       pattern_ = new_pattern;
       last_idx_ = idx;
