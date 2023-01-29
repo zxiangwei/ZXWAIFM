@@ -4,6 +4,7 @@
 #include "pointer.hpp"
 #include "prefetcher.hpp"
 #include "prefetcher_leap.hpp"
+#include "prefetcher_lr.hpp"
 
 #include <cstdint>
 #include <limits>
@@ -39,7 +40,7 @@ protected:
                                         Index_t idx) -> GenericUniquePtr * {
     return mapping_fn(state, idx);
   };
-  leap::Prefetcher<decltype(kInduceFn), decltype(kInferFn), decltype(kMappingFn)>
+  lr::Prefetcher<decltype(kInduceFn), decltype(kInferFn), decltype(kMappingFn)>
       prefetcher_;
 
   GenericArray(FarMemManager *manager, uint32_t item_size, uint64_t num_items);
