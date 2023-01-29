@@ -61,7 +61,7 @@ class Prefetcher {
     rt::CondVar cv;
   };
 
-  TrendPredictor<Pattern_t, 8> trend_predictor_;
+  TrendPredictor<Pattern_t, 32> trend_predictor_;
 
   constexpr static uint32_t kHitTimesThresh = 2;
   constexpr static uint32_t kMaxSlaveWaitUs = 5;
