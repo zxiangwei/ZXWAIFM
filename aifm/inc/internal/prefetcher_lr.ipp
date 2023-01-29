@@ -118,7 +118,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::add_trace(bool nt, Index_t idx) {
   if (trend_predictor_.MatchTrend()) {
     hit_times_++;
     Index_t prefetch_idx = idx;
-    for (uint32_t i = 0; i < kPrefetchWinSize_; ++i) {
+    for (uint32_t i = 0; i < kPrefetchNum; ++i) {
       auto pat = trend_predictor_.GetTrend(i);
       prefetch_idx = inferer(prefetch_idx, pat);
       GenericUniquePtr *task = mapper(state_, prefetch_idx);
