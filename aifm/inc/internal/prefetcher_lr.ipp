@@ -4,7 +4,7 @@
 
 #include <optional>
 
-#define PREFECHER_LR_LOG 1
+//#define PREFECHER_LR_LOG 1
 
 #ifdef PREFECHER_LR_LOG
 #include <iostream>
