@@ -4,7 +4,7 @@
 
 #include <optional>
 
-//#define PREFECHER_LR_LOG 1
+#define PREFECHER_LR_LOG 1
 
 #ifdef PREFECHER_LR_LOG
 #include <iostream>
@@ -121,6 +121,9 @@ Prefetcher<InduceFn, InferFn, MappingFn>::add_trace(bool nt, Index_t idx) {
     for (uint32_t i = 0; i < kPrefetchNum; ++i) {
       auto pat = trend_predictor_.GetTrend(i);
       prefetch_idx = inferer(prefetch_idx, pat);
+#ifdef PREFECHER_LR_LOG
+      printf("visit(%d), prefetch(%d-%d)\n", idx, i, prefetch_idx);
+#endif
       GenericUniquePtr *task = mapper(state_, prefetch_idx);
       dispatch_prefetch_task(task);
     }
