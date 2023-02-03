@@ -12,6 +12,8 @@ links=(https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2016-01.csv \
        https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2015-02.csv \
        https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2015-03.csv)
 
+links=(https://github.com/anish749/nyc-tlc-minh/blob/master/data/yellow_tripdata_2016-01.csv)
+
 head=yellow_tripdata_2016-01.csv
 
 sudo umount /dev/sda4
