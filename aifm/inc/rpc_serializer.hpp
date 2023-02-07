@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RPC_SERIALIZER_HPP_
+#define RPC_SERIALIZER_HPP_
 
 #include "rpc_buffer.hpp"
 #include "rpc_coding.hpp"
@@ -382,3 +383,4 @@ Serializer &operator>>(Serializer &serializer, std::unordered_multimap<Key, Valu
 
 #include "rpc_serialize_macro.hpp"
 
+#endif

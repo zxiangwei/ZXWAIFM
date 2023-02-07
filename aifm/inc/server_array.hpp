@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RPC_TRAITS_HPP_
+#define RPC_TRAIST_HPP_
 
 #include <vector>
 
@@ -52,3 +53,5 @@ class ServerArrayFactory : public ServerDSFactory {
 };
 
 } // namespace far_memory
+
+#endif

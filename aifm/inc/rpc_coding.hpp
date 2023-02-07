@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RPC_CODING_HPP_
+#define RPC_CODING_HPP_
 
 #include <cstring>
 #include <cstdint>
@@ -145,3 +146,5 @@ inline int DecodeVarInt64(const char *src, int64_t &value) {
 }
 
 } // namespace rpc
+
+#endif

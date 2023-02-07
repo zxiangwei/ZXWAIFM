@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RPC_PROTOCOL_HPP_
+#define RPC_PROTOCOL_HPP_
 
 #include "rpc_serializer.hpp"
 
@@ -45,3 +46,5 @@ T GetReturnValueFromBuffer(const BufferPtr &buffer) {
 }
 
 }
+
+#endif

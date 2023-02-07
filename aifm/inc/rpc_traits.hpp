@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RPC_TRAITS_HPP_
+#define RPC_TRAITS_HPP_
 
 #include <functional>
 
@@ -73,3 +74,5 @@ static_assert(std::is_same_v<FunctionTraits<ObjectFunc>::FunctionType, char(bool
 }
 
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RPC_BUFFER_HPP_
+#define RPC_BUFFER_HPP_
 
 #include <cstddef>
 #include <vector>
@@ -111,3 +112,5 @@ class Buffer {
 using BufferPtr = std::shared_ptr<Buffer>;
 
 } // namespace rpc
+
+#endif

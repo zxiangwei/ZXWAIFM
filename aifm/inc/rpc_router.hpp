@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RPC_ROUTER_HPP_
+#define RPC_ROUTER_HPP_
 
 #include "rpc_traits.hpp"
 #include "rpc_serializer.hpp"
@@ -63,3 +64,5 @@ class RpcRouter {
 };
 
 }
+
+#endif
