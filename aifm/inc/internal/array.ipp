@@ -161,10 +161,4 @@ Array<T, Dims...>::static_prefetch(std::tuple<ArgsStart...> start,
   GenericArray::static_prefetch(start_flat_idx, step_flat_idx, num);
 }
 
-template <typename T, uint64_t... Dims>
-FORCE_INLINE void Array<T, Dims...>::flush() {
-  if (!dirty_) return;
-
-}
-
 } // namespace far_memory
