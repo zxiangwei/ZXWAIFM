@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <stdexcept>
 #include <type_traits>
-#include <array.hpp>
 
 namespace far_memory {
 
