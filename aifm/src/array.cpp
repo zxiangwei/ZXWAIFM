@@ -32,7 +32,7 @@ GenericArray::~GenericArray() {
   FarMemManagerFactory::get()->destruct(ds_id_);
 }
 
-FORCE_INLINE void GenericArray::flush() {
+void GenericArray::flush() {
   if (!dirty_) return;
   dirty_ = false;
   std::vector<rt::Thread> threads;
