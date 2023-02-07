@@ -151,7 +151,7 @@ FORCE_INLINE void FarMemManager::destruct(uint8_t ds_id) {
   device_ptr_->destruct(ds_id);
 }
 
-bool FarMemManager::call(uint8_t ds_id,
+FORCE_INLINE bool FarMemManager::call(uint8_t ds_id,
                          const std::string &method,
                          const rpc::BufferPtr &args,
                          rpc::BufferPtr &ret) {

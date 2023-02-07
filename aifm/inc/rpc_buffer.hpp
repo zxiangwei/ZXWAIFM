@@ -1,9 +1,12 @@
 #ifndef RPC_BUFFER_HPP_
 #define RPC_BUFFER_HPP_
 
+#include <algorithm>
 #include <cstddef>
 #include <vector>
 #include <memory>
+#include <string>
+#include <string_view>
 
 namespace rpc {
 
