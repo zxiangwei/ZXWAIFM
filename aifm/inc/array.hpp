@@ -24,10 +24,12 @@ protected:
   static Pattern_t induce_fn(Index_t idx_0, Index_t idx_1);
   static Index_t infer_fn(Index_t idx, Pattern_t stride);
   static GenericUniquePtr *mapping_fn(uint8_t *&state, Index_t idx);
+  uint8_t ds_id_;
   std::unique_ptr<GenericUniquePtr[]> ptrs_;
   uint64_t kNumItems_;
   uint32_t kItemSize_;
   bool dynamic_prefetch_enabled_ = true;
+  bool dirty_ = false;
   constexpr static auto kInduceFn = [](Index_t idx_0,
                                        Index_t idx_1) -> Pattern_t {
     return GenericArray::induce_fn(idx_0, idx_1);
@@ -53,6 +55,10 @@ public:
   void enable_prefetch();
   void static_prefetch(Index_t start, Index_t step, uint32_t num);
   GenericUniquePtr *at(bool nt, Index_t idx);
+
+  void flush();
+  bool call(const std::string &method, const rpc::BufferPtr &args,
+            rpc::BufferPtr &ret);
 };
 
 template <typename T, uint64_t... Dims> class Array : public GenericArray {
@@ -102,6 +108,7 @@ public:
   template <typename... ArgsStart, typename... ArgsStep>
   void static_prefetch(std::tuple<ArgsStart...> start,
                        std::tuple<ArgsStep...> step, uint32_t num);
+
 };
 
 } // namespace far_memory

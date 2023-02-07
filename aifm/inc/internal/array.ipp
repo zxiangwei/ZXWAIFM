@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <type_traits>
+#include <array.hpp>
 
 namespace far_memory {
 
@@ -117,6 +118,7 @@ template <typename T, uint64_t... Dims>
 template <bool Nt, typename... Indices>
 FORCE_INLINE T &Array<T, Dims...>::at_mut(const DerefScope &scope,
                                           Indices... indices) noexcept {
+  dirty_ = true;
   auto idx = get_flat_idx(indices...);
   auto ptr = reinterpret_cast<UniquePtr<T> *>(GenericArray::at(Nt, idx));
   return *(ptr->template deref_mut<Nt>(scope));
@@ -157,6 +159,12 @@ Array<T, Dims...>::static_prefetch(std::tuple<ArgsStart...> start,
   auto step_flat_idx =
       std::apply([&](auto &&... args) { return get_flat_idx(args...); }, step);
   GenericArray::static_prefetch(start_flat_idx, step_flat_idx, num);
+}
+
+template <typename T, uint64_t... Dims>
+FORCE_INLINE void Array<T, Dims...>::flush() {
+  if (!dirty_) return;
+
 }
 
 } // namespace far_memory

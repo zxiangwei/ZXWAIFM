@@ -142,6 +142,14 @@ void TCPDevice::compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
   shared_pool_.push(remote_slave);
 }
 
+bool TCPDevice::call(uint8_t ds_id, const std::string &method,
+                     const rpc::BufferPtr &args, rpc::BufferPtr &ret) {
+  auto remote_slave = shared_pool_.pop();
+  bool success = _call(remote_slave, ds_id, method, args, ret);
+  shared_pool_.push(remote_slave);
+  return success;
+}
+
 // Request:
 // |Opcode = KOpReadObject(1B) | ds_id(1B) | obj_id_len(1B) | obj_id |
 // Response:
@@ -328,6 +336,44 @@ void TCPDevice::_compute(tcpconn_t *remote_slave, uint8_t ds_id, uint8_t opcode,
     assert(*output_len <= kMaxComputeDataLen);
     helpers::tcp_read_until(remote_slave, output_buf, *output_len);
   }
+}
+
+// Request:
+// |Opcode = kOpCall(1B)|ds_id(1B)|body_len(2B)|body(method+args)|
+// Response:
+// |ret_len(2B)|ret|
+bool TCPDevice::_call(tcpconn_t *remote_slave,
+                      uint8_t ds_id,
+                      const std::string &method,
+                      const rpc::BufferPtr &args,
+                      rpc::BufferPtr &ret) {
+  assert(serializer.ReadableBytes() <= kMaxCallDataLen);
+  rpc::Serializer serializer;
+  serializer << method << args;
+  uint16_t body_len = serializer.ReadableBytes();
+  auto body_buffer = serializer.GetBuffer();
+  uint8_t req_header[kOpcodeSize + Object::kDSIDSize + sizeof(body_len)];
+
+  __builtin_memcpy(&req_header[0], &kOpCompute, sizeof(kOpWriteObject));
+  __builtin_memcpy(&req_header[kOpcodeSize], &ds_id, Object::kDSIDSize);
+  __builtin_memcpy(&req_header[kOpcodeSize + Object::kDSIDSize],
+                   &body_len, sizeof(body_len));
+
+  helpers::tcp_write2_until(remote_slave, req_header,
+                            kOpcodeSize + Object::kDSIDSize + sizeof(body_len),
+                            body_buffer->GetReadPtr(), body_len);
+
+  uint16_t ret_len;
+  helpers::tcp_read_until(remote_slave, &ret_len, sizeof(ret_len));
+  if (ret_len) {
+    assert(ret_len <= kMaxCallDataLen);
+    ret = std::make_shared<rpc::Buffer>(ret_len);
+    helpers::tcp_read_until(remote_slave, ret->GetWritePtr(), ret_len);
+    rpc::Serializer ret_serializer(ret);
+    auto error_code = rpc::Get<rpc::RpcErrorCode>(ret_serializer);
+    if (error_code == rpc::RpcErrorCode::kSuccess) return true;
+  }
+  return false;
 }
 
 } // namespace far_memory

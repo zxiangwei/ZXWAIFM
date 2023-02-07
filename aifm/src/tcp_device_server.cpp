@@ -226,6 +226,40 @@ void process_compute(tcpconn_t *c) {
   helpers::tcp_write_until(c, resp, sizeof(*output_len) + *output_len);
 }
 
+// Request:
+// |Opcode = kOpCall(1B)|ds_id(1B)|body_len(2B)|body(method+args)|
+// Response:
+// |ret_len(2B)|ret|
+void process_call(tcpconn_t *c) {
+  uint16_t body_len;
+  uint8_t req_header[Object::kDSIDSize + sizeof(body_len)];
+
+  helpers::tcp_read_until(
+      c, req_header, Object::kDSIDSize + sizeof(body_len));
+
+  auto ds_id = *reinterpret_cast<uint8_t *>(&req_header[0]);
+  body_len = *reinterpret_cast<uint16_t *>(&req_header[Object::kDSIDSize]);
+  assert(body_len <= TCPDevice::kMaxCallDataLen);
+
+  auto body_buffer = std::make_shared<rpc::Buffer>(body_len);
+
+  if (body_len) {
+    helpers::tcp_read_until( c, body_buffer->GetWritePtr(), body_len);
+    body_buffer->HasWritten(body_len);
+  }
+
+  rpc::Serializer body_serializer(body_buffer);
+  auto method = rpc::Get<std::string>(body_serializer);
+
+  BufferPtr ret_buffer;
+  server.call(ds_id, method, body_buffer, ret_buffer);
+  uint16_t ret_len = ret_buffer->ReadableBytes(); // 没有处理大端小端
+
+  helpers::tcp_write2_until(c, &ret_len, sizeof(ret_len),
+                            ret_buffer->GetReadPtr(), ret_len);
+  // 理论上来说还应该加一步：ret_buffer.HasRead(ret_len),但不是必要的
+}
+
 void slave_fn(tcpconn_t *c) {
   // Run event loop.
   uint8_t opcode;
@@ -250,6 +284,9 @@ void slave_fn(tcpconn_t *c) {
       break;
     case TCPDevice::kOpCompute:
       process_compute(c);
+      break;
+    case TCPDevice::kOpCall:
+      process_call(c);
       break;
     default:
       BUG();

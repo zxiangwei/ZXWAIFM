@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "rpc_router.hpp"
+
 class ServerDS {
 public:
   virtual ~ServerDS() {}
@@ -13,6 +15,8 @@ public:
   virtual void compute(uint8_t opcode, uint16_t input_len,
                        const uint8_t *input_buf, uint16_t *output_len,
                        uint8_t *output_buf) = 0;
+  virtual void call(const std::string &method, const rpc::BufferPtr &args,
+                    rpc::BufferPtr &reply) {}
 };
 
 class ServerDSFactory {

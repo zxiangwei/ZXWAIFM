@@ -10,17 +10,53 @@ GenericArray::GenericArray(FarMemManager *manager, uint32_t item_size,
     : kNumItems_(num_items), kItemSize_(item_size),
       prefetcher_(manager->get_device(), reinterpret_cast<uint8_t *>(&ptrs_),
                   item_size) {
+  ds_id_ = manager->allocate_ds_id();
+  uint8_t params[sizeof(num_items) + sizeof(item_size)];
+  __builtin_memcpy(&params[0], &num_items, sizeof(num_items));
+  __builtin_memcpy(&params[sizeof(num_items)], &item_size, sizeof(item_size));
+  manager->construct(kArrayDSType, ds_id_,
+                     sizeof(num_items) + sizeof(item_size), params);
+
   preempt_disable();
   ptrs_.reset(new GenericUniquePtr[num_items]);
   preempt_enable();
   for (uint64_t i = 0; i < num_items; i++) {
-    ptrs_[i] = manager->allocate_generic_unique_ptr(kVanillaPtrDSID, item_size);
+    ptrs_[i] = manager->allocate_generic_unique_ptr(ds_id_, item_size,
+                                                    sizeof(i), reinterpret_cast<uint8_t *>(&i));
   }
   kItemSize_ = item_size;
   kNumItems_ = num_items;
 }
 
-GenericArray::~GenericArray() {}
+GenericArray::~GenericArray() {
+  FarMemManagerFactory::get()->destruct(ds_id_);
+}
+
+FORCE_INLINE void GenericArray::flush() {
+  if (!dirty_) return;
+  dirty_ = false;
+  std::vector<rt::Thread> threads;
+  for (uint32_t tid = 0; tid < helpers::kNumCPUs; tid++) {
+    threads.emplace_back([&, tid]() {
+      auto num_tasks_per_threads =
+          (kNumItems_ == 0)
+          ? 0
+          : (kNumItems_ - 1) / helpers::kNumCPUs + 1;
+      auto left = num_tasks_per_threads * tid;
+      auto right = std::min(left + num_tasks_per_threads, kNumItems_);
+      for (uint64_t i = left; i < right; i++) {
+        ptrs_[i].flush();
+      }
+    });
+  }
+  for (auto &thread : threads) {
+    thread.Join();
+  }
+}
+
+bool GenericArray::call(const std::string &method, const rpc::BufferPtr &args, rpc::BufferPtr &ret) {
+  return FarMemManagerFactory::get()->call(ds_id_, method, args, ret);
+}
 
 void GenericArray::disable_prefetch() {
   ACCESS_ONCE(dynamic_prefetch_enabled_) = false;

@@ -2,6 +2,7 @@
 
 #include "internal/ds_info.hpp"
 #include "server_ds.hpp"
+#include "rpc_serializer.hpp"
 
 #include <functional>
 #include <memory>
@@ -26,6 +27,9 @@ public:
   void compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
                const uint8_t *input_buf, uint16_t *output_len,
                uint8_t *output_buf);
+  bool call(uint8_t ds_id, const std::string &method,
+            const rpc::BufferPtr &args, rpc::BufferPtr &ret);
+
   static ServerDS *get_server_ds(uint8_t ds_id);
 };
 } // namespace far_memory

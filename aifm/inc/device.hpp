@@ -7,6 +7,7 @@ extern "C" {
 #include "helpers.hpp"
 #include "server.hpp"
 #include "shared_pool.hpp"
+#include "rpc_serializer.hpp"
 
 namespace far_memory {
 
@@ -33,6 +34,11 @@ public:
   virtual void compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
                        const uint8_t *input_buf, uint16_t *output_len,
                        uint8_t *output_buf) = 0;
+
+  virtual bool call(uint8_t ds_id, const std::string &method, const rpc::BufferPtr &args,
+                    rpc::BufferPtr &ret) {
+    return false;
+  }
 };
 
 class FakeDevice : public FarMemDevice {
@@ -77,8 +83,11 @@ private:
   void _compute(tcpconn_t *remote_slave, uint8_t ds_id, uint8_t opcode,
                 uint16_t input_len, const uint8_t *input_buf,
                 uint16_t *output_len, uint8_t *output_buf);
+  bool _call(tcpconn_t *remote_slave, uint8_t ds_id,
+             const std::string &method, const rpc::BufferPtr &args,
+             rpc::BufferPtr &ret);
 
-public:
+ public:
   // TCPDevice talks to remote agent via TCP.
   // Request format:
   //     |OpCode (1B)|Data (optional)|
@@ -91,10 +100,12 @@ public:
   //     5. construct
   //     6. destruct
   //     7. compute
+  //     8. call
   constexpr static uint32_t kOpcodeSize = 1;
   constexpr static uint32_t kPortSize = 2;
   constexpr static uint32_t kLargeDataSize = 512;
   constexpr static uint32_t kMaxComputeDataLen = 65535;
+  constexpr static uint32_t kMaxCallDataLen = 65535;
 
   constexpr static uint8_t kOpInit = 0;
   constexpr static uint8_t kOpShutdown = 1;
@@ -104,6 +115,7 @@ public:
   constexpr static uint8_t kOpConstruct = 5;
   constexpr static uint8_t kOpDeconstruct = 6;
   constexpr static uint8_t kOpCompute = 7;
+  constexpr static uint8_t kOpCall = 8;
 
   TCPDevice(netaddr raddr, uint32_t num_connections, uint64_t far_mem_size);
   ~TCPDevice();
@@ -118,6 +130,9 @@ public:
   void compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
                const uint8_t *input_buf, uint16_t *output_len,
                uint8_t *output_buf);
+
+  bool call(uint8_t ds_id, const std::string &method, const rpc::BufferPtr &args,
+            rpc::BufferPtr &ret);
 };
 
 } // namespace far_memory

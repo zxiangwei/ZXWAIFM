@@ -204,6 +204,8 @@ public:
   void construct(uint8_t ds_type, uint8_t ds_id, uint32_t param_len,
                  uint8_t *params);
   void destruct(uint8_t ds_id);
+  bool call(uint8_t ds_id, const std::string &method,
+            const rpc::BufferPtr &args, rpc::BufferPtr &ret);
   void mutator_wait_for_gc_cache();
   static void lock_object(uint8_t obj_id_len, const uint8_t *obj_id);
   static void unlock_object(uint8_t obj_id_len, const uint8_t *obj_id);

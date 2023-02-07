@@ -9,6 +9,7 @@ extern "C" {
 #include "server_dataframe_vector.hpp"
 #include "server_hashtable.hpp"
 #include "server_ptr.hpp"
+#include "server_array.hpp"
 
 namespace far_memory {
 
@@ -18,6 +19,7 @@ Server::Server() {
   register_ds(kVanillaPtrDSType, new ServerPtrFactory());
   register_ds(kHashTableDSType, new ServerHashTableFactory());
   register_ds(kDataFrameVectorDSType, new ServerDataFrameVectorFactory());
+  register_ds(kArrayDSType, new ServerArrayFactory());
 }
 
 void Server::register_ds(uint8_t ds_type, ServerDSFactory *factory) {
@@ -70,6 +72,11 @@ void Server::compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
                      uint8_t *output_buf) {
   auto ds_ptr = server_ds_ptrs_[ds_id].get();
   return ds_ptr->compute(opcode, input_len, input_buf, output_len, output_buf);
+}
+
+bool Server::call(uint8_t ds_id, const std::string &method, rpc::BufferPtr &args, const rpc::BufferPtr &ret) {
+  auto ds_ptr = server_ds_ptrs_[ds_id].get();
+  return ds_ptr->call(method, args, ret);
 }
 
 ServerDS *Server::get_server_ds(uint8_t ds_id) {
