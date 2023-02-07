@@ -1,5 +1,5 @@
-#ifndef RPC_TRAITS_HPP_
-#define RPC_TRAIST_HPP_
+#ifndef RPC_ARRAY_HPP_
+#define RPC_ARRAY_HPP_
 
 #include <vector>
 
