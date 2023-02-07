@@ -251,7 +251,7 @@ void process_call(tcpconn_t *c) {
   rpc::Serializer body_serializer(body_buffer);
   auto method = rpc::Get<std::string>(body_serializer);
 
-  BufferPtr ret_buffer;
+  rpc::BufferPtr ret_buffer;
   server.call(ds_id, method, body_buffer, ret_buffer);
   uint16_t ret_len = ret_buffer->ReadableBytes(); // 没有处理大端小端
 

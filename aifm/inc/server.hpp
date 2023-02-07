@@ -27,7 +27,8 @@ public:
   void compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
                const uint8_t *input_buf, uint16_t *output_len,
                uint8_t *output_buf);
-  bool call(uint8_t ds_id, const std::string &method,
+  // ret还包括RpcErrorCode
+  void call(uint8_t ds_id, const std::string &method,
             const rpc::BufferPtr &args, rpc::BufferPtr &ret);
 
   static ServerDS *get_server_ds(uint8_t ds_id);

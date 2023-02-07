@@ -74,9 +74,10 @@ void Server::compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
   return ds_ptr->compute(opcode, input_len, input_buf, output_len, output_buf);
 }
 
-bool Server::call(uint8_t ds_id, const std::string &method, rpc::BufferPtr &args, const rpc::BufferPtr &ret) {
+void Server::call(uint8_t ds_id, const std::string &method,
+                  const rpc::BufferPtr &args, rpc::BufferPtr &ret) {
   auto ds_ptr = server_ds_ptrs_[ds_id].get();
-  return ds_ptr->call(method, args, ret);
+  ds_ptr->call(method, args, ret);
 }
 
 ServerDS *Server::get_server_ds(uint8_t ds_id) {
