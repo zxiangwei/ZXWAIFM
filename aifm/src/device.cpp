@@ -338,6 +338,14 @@ void TCPDevice::_compute(tcpconn_t *remote_slave, uint8_t ds_id, uint8_t opcode,
   }
 }
 
+#define RPC_LOG_ON 1
+
+#if RPC_LOG_ON
+#define RPC_LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__);
+#else
+#define RPC_LOG(fmt, ...)
+#endif
+
 // Request:
 // |Opcode = kOpCall(1B)|ds_id(1B)|body_len(2B)|body(method+args)|
 // Response:
@@ -354,6 +362,9 @@ bool TCPDevice::_call(tcpconn_t *remote_slave,
   auto body_buffer = serializer.GetBuffer();
   uint8_t req_header[kOpcodeSize + Object::kDSIDSize + sizeof(body_len)];
 
+  RPC_LOG("TCPDevice::_call(ds_id: %d, method: %s, body_len: %d)",
+          ds_id, method.c_str(), body_len);
+
   __builtin_memcpy(&req_header[0], &kOpCompute, sizeof(kOpWriteObject));
   __builtin_memcpy(&req_header[kOpcodeSize], &ds_id, Object::kDSIDSize);
   __builtin_memcpy(&req_header[kOpcodeSize + Object::kDSIDSize],
@@ -363,8 +374,11 @@ bool TCPDevice::_call(tcpconn_t *remote_slave,
                             kOpcodeSize + Object::kDSIDSize + sizeof(body_len),
                             body_buffer->GetReadPtr(), body_len);
 
+  RPC_LOG("TCPDevice::_call write success");
+
   uint16_t ret_len;
   helpers::tcp_read_until(remote_slave, &ret_len, sizeof(ret_len));
+  RPC_LOG("TCPDevice::_call read success");
   if (ret_len) {
     assert(ret_len <= kMaxCallDataLen);
     ret = std::make_shared<rpc::Buffer>(ret_len);
@@ -372,6 +386,7 @@ bool TCPDevice::_call(tcpconn_t *remote_slave,
     rpc::Serializer ret_serializer(ret);
     auto error_code = rpc::Get<rpc::RpcErrorCode>(ret_serializer);
     if (error_code == rpc::RpcErrorCode::kSuccess) return true;
+    RPC_LOG("TCPDevice::_call RPC Failed");
   }
   return false;
 }
