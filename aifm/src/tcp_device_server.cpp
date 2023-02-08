@@ -273,6 +273,7 @@ void slave_fn(tcpconn_t *c) {
   int ret;
   while ((ret = tcp_read(c, &opcode, TCPDevice::kOpcodeSize)) > 0) {
     BUG_ON(ret != TCPDevice::kOpcodeSize);
+    FLOG("opcode: %d", opcode);
     switch (opcode) {
     case TCPDevice::kOpReadObject:
       process_read_object(c);

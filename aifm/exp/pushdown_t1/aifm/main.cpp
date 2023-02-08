@@ -181,7 +181,7 @@ void array_test() {
   auto content = rpc::GetReturnValueFromBuffer<std::vector<uint8_t>>(ret);
   LOG_ASSERT(content.size() == sizeof(int), "size: %ld, expected: %ld", content.size(), sizeof(int));
   int parsed_content = *reinterpret_cast<int *>(content.data());
-  LOG_ASSERT(parsed_content == 4, "parsed_content: %d, expectedd: 4", parsed_content);
+  LOG_ASSERT(parsed_content == 4, "parsed_content: %d, expected: 4", parsed_content);
 
   LOG("Finish");
 }
