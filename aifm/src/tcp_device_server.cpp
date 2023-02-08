@@ -29,7 +29,7 @@ rt::Thread master_thread;
 Server server;
 FILE *log_file;
 
-#define FLOG(fmt, ...) fprintf(log_file, fmt "\n", ##__VA_ARGS__);
+#define FLOG(fmt, ...) fprintf(log_file, fmt "\n", ##__VA_ARGS__); fflush(log_file);
 
 // Request:
 //     |OpCode = Init (1B)|Far Mem Size (8B)|
@@ -273,7 +273,7 @@ void slave_fn(tcpconn_t *c) {
   int ret;
   while ((ret = tcp_read(c, &opcode, TCPDevice::kOpcodeSize)) > 0) {
     BUG_ON(ret != TCPDevice::kOpcodeSize);
-    FLOG("opcode: %d", opcode);
+//    FLOG("opcode: %d", opcode);
     switch (opcode) {
     case TCPDevice::kOpReadObject:
       process_read_object(c);
