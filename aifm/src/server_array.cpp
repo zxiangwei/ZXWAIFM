@@ -39,7 +39,8 @@ void ServerArray::call(const std::string &method, const rpc::BufferPtr &args,
   auto reply = router_.Call(method, args);
   ret = std::make_shared<rpc::Buffer>(sizeof(rpc::RpcErrorCode) + reply.ret->ReadableBytes());
   rpc::Serializer ret_serializer(ret);
-  ret_serializer << reply.error_code << reply.ret;
+  ret_serializer << reply.error_code;
+  ret_serializer.WriteRaw(reply.ret->GetReadPtr(), reply.ret->ReadableBytes());
 }
 
 ServerDS *ServerArrayFactory::build(uint32_t param_len, uint8_t *params) {
