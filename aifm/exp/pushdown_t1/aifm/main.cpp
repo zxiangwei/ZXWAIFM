@@ -145,10 +145,10 @@ void fm_compress_files_bench(const string &in_file_path,
 
 #define LOG_ASSERT(expr, fmt, ...) \
   if (!(expr)) {                     \
-    printf(fmt, ##__VA_ARGS__);                                 \
+    printf(fmt "\n", ##__VA_ARGS__);                                 \
   }
 
-#define LOG(fmt, ...) printf(fmt, ##__VA_ARGS__);
+#define LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__);
 
 void array_test() {
   constexpr uint64_t kIntArraySize = 1000;
@@ -163,21 +163,21 @@ void array_test() {
   LOG("Start reading");
   for (uint64_t i = 0; i < kIntArraySize; ++i) {
     int v = int_array->read(i);
-    LOG_ASSERT(v == i, "%d != %ld\n", v, i);
+    LOG_ASSERT(v == (int)(i), "%d != %ld", v, i);
   }
 
   LOG("Start calling Add");
   rpc::BufferPtr args, ret;
   args = rpc::SerializeArgsToBuffer(2, 3);
   bool success = int_array->call("Add", args, ret);
-  LOG_ASSERT(success, "Call Add Failed\n");
+  LOG_ASSERT(success, "Call Add Failed");
   int ans = rpc::GetReturnValueFromBuffer<int>(ret);
-  LOG_ASSERT(ans == 5, "ans: %d, expected: 5\n", ans);
+  LOG_ASSERT(ans == 5, "ans: %d, expected: 5", ans);
 
   LOG("Start calling Read");
   args = rpc::SerializeArgsToBuffer(4);
   success = int_array->call("Read", args, ret);
-  LOG_ASSERT(success, "Call Read Failed\n");
+  LOG_ASSERT(success, "Call Read Failed");
   auto content = rpc::GetReturnValueFromBuffer<std::vector<uint8_t>>(ret);
   LOG_ASSERT(content.size() == sizeof(int), "size: %ld, expected: %ld", content.size(), sizeof(int));
   int parsed_content = *reinterpret_cast<int *>(content.data());
