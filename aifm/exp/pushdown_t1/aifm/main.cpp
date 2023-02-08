@@ -175,7 +175,7 @@ void array_test() {
   LOG_ASSERT(ans == 5, "ans: %d, expected: 5", ans);
 
   LOG("Start calling Read");
-  args = rpc::SerializeArgsToBuffer(4);
+  args = rpc::SerializeArgsToBuffer(static_cast<size_t>(4));
   success = int_array->call("Read", args, ret);
   LOG_ASSERT(success, "Call Read Failed");
   auto content = rpc::GetReturnValueFromBuffer<std::vector<uint8_t>>(ret);
