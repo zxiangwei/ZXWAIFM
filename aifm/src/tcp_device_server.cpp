@@ -317,7 +317,7 @@ void master_fn(tcpconn_t *c) {
 }
 
 void do_work(uint16_t port) {
-  log_file = fopen("~/tcp_device_server.log", "w+");
+  log_file = fopen("/users/zhj/tcp_device_server.log", "w+");
   tcpqueue_t *q;
   struct netaddr server_addr = {.ip = 0, .port = port};
   tcp_listen(server_addr, 1, &q);
