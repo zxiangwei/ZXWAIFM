@@ -357,7 +357,8 @@ bool TCPDevice::_call(tcpconn_t *remote_slave,
                       rpc::BufferPtr &ret) {
   assert(serializer.ReadableBytes() <= kMaxCallDataLen);
   rpc::Serializer serializer;
-  serializer << method << args;
+  serializer << method;
+  serializer.WriteRaw(args->GetReadPtr(), args->ReadableBytes());
   uint16_t body_len = serializer.ReadableBytes();
   auto body_buffer = serializer.GetBuffer();
   uint8_t req_header[kOpcodeSize + Object::kDSIDSize + sizeof(body_len)];
