@@ -378,11 +378,12 @@ bool TCPDevice::_call(tcpconn_t *remote_slave,
 
   uint16_t ret_len;
   helpers::tcp_read_until(remote_slave, &ret_len, sizeof(ret_len));
-  RPC_LOG("TCPDevice::_call read success");
+  RPC_LOG("TCPDevice::_call read header success(ret_len: %d)", ret_len);
   if (ret_len) {
     assert(ret_len <= kMaxCallDataLen);
     ret = std::make_shared<rpc::Buffer>(ret_len);
     helpers::tcp_read_until(remote_slave, ret->GetWritePtr(), ret_len);
+    RPC_LOG("TCPDevice::_call read body success");
     rpc::Serializer ret_serializer(ret);
     auto error_code = rpc::Get<rpc::RpcErrorCode>(ret_serializer);
     if (error_code == rpc::RpcErrorCode::kSuccess) return true;

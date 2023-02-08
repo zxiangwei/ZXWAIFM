@@ -27,6 +27,9 @@ std::unique_ptr<uint8_t> far_mem;
 std::atomic<bool> has_shutdown{true};
 rt::Thread master_thread;
 Server server;
+FILE *log_file;
+
+#define FLOG(fmt, ...) fprintf(log_file, fmt, ##__VA_ARGS__);
 
 // Request:
 //     |OpCode = Init (1B)|Far Mem Size (8B)|
@@ -231,6 +234,7 @@ void process_compute(tcpconn_t *c) {
 // Response:
 // |ret_len(2B)|ret|
 void process_call(tcpconn_t *c) {
+  FLOG("Start process call");
   uint16_t body_len;
   uint8_t req_header[Object::kDSIDSize + sizeof(body_len)];
 
@@ -240,6 +244,7 @@ void process_call(tcpconn_t *c) {
   auto ds_id = *reinterpret_cast<uint8_t *>(&req_header[0]);
   body_len = *reinterpret_cast<uint16_t *>(&req_header[Object::kDSIDSize]);
   assert(body_len <= TCPDevice::kMaxCallDataLen);
+  FLOG("Read Header Success(ds_id: %d, body_len: %d)", ds_id, body_len);
 
   auto body_buffer = std::make_shared<rpc::Buffer>(body_len);
 
@@ -250,10 +255,12 @@ void process_call(tcpconn_t *c) {
 
   rpc::Serializer body_serializer(body_buffer);
   auto method = rpc::Get<std::string>(body_serializer);
+  FLOG("Read Body Success(method: %s)", method.c_str());
 
   rpc::BufferPtr ret_buffer;
   server.call(ds_id, method, body_buffer, ret_buffer);
   uint16_t ret_len = ret_buffer->ReadableBytes(); // 没有处理大端小端
+  FLOG("Write Response(ret_len: %d)", ret_len);
 
   helpers::tcp_write2_until(c, &ret_len, sizeof(ret_len),
                             ret_buffer->GetReadPtr(), ret_len);
@@ -265,6 +272,7 @@ void slave_fn(tcpconn_t *c) {
   uint8_t opcode;
   int ret;
   while ((ret = tcp_read(c, &opcode, TCPDevice::kOpcodeSize)) > 0) {
+    FLOG("Receive new request: %d", opcode);
     BUG_ON(ret != TCPDevice::kOpcodeSize);
     switch (opcode) {
     case TCPDevice::kOpReadObject:
@@ -309,6 +317,7 @@ void master_fn(tcpconn_t *c) {
 }
 
 void do_work(uint16_t port) {
+  log_file = fopen("~/tcp_device_server.log", "w+");
   tcpqueue_t *q;
   struct netaddr server_addr = {.ip = 0, .port = port};
   tcp_listen(server_addr, 1, &q);
