@@ -365,7 +365,7 @@ bool TCPDevice::_call(tcpconn_t *remote_slave,
   RPC_LOG("TCPDevice::_call(ds_id: %d, method: %s, body_len: %d)",
           ds_id, method.c_str(), body_len);
 
-  __builtin_memcpy(&req_header[0], &kOpCompute, sizeof(kOpWriteObject));
+  __builtin_memcpy(&req_header[0], &kOpCall, sizeof(kOpCall));
   __builtin_memcpy(&req_header[kOpcodeSize], &ds_id, Object::kDSIDSize);
   __builtin_memcpy(&req_header[kOpcodeSize + Object::kDSIDSize],
                    &body_len, sizeof(body_len));
