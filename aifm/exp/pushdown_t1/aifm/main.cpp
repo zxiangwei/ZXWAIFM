@@ -148,18 +148,25 @@ void fm_compress_files_bench(const string &in_file_path,
     printf(fmt, ##__VA_ARGS__);                                 \
   }
 
+#define LOG(fmt, ...) printf(fmt, ##__VA_ARGS__);
+
 void array_test() {
   constexpr uint64_t kIntArraySize = 1000;
+  LOG("Start allocating");
   auto int_array = FarMemManagerFactory::get()->allocate_array_heap<int, kIntArraySize>();
+  LOG("Start writing");
   for (uint64_t i = 0; i < kIntArraySize; ++i) {
     int_array->write(static_cast<int>(i), i);
   }
+  LOG("Start flushing");
   int_array->flush();
+  LOG("Start reading");
   for (uint64_t i = 0; i < kIntArraySize; ++i) {
     int v = int_array->read(i);
     LOG_ASSERT(v == i, "%d != %ld\n", v, i);
   }
 
+  LOG("Start calling Add");
   rpc::BufferPtr args, ret;
   args = rpc::SerializeArgsToBuffer(2, 3);
   bool success = int_array->call("Add", args, ret);
@@ -167,6 +174,7 @@ void array_test() {
   int ans = rpc::GetReturnValueFromBuffer<int>(ret);
   LOG_ASSERT(ans == 5, "ans: %d, expected: 5\n", ans);
 
+  LOG("Start calling Read");
   args = rpc::SerializeArgsToBuffer(4);
   success = int_array->call("Read", args, ret);
   LOG_ASSERT(success, "Call Read Failed\n");
@@ -174,17 +182,19 @@ void array_test() {
   LOG_ASSERT(content.size() == sizeof(int), "size: %ld, expected: %ld", content.size(), sizeof(int));
   int parsed_content = *reinterpret_cast<int *>(content.data());
   LOG_ASSERT(parsed_content == 4, "parsed_content: %d, expectedd: 4", parsed_content);
+
+  LOG("Finish");
 }
 
 void do_work(netaddr raddr) {
   auto manager = std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
       kCacheSize, kNumGCThreads,
       new TCPDevice(raddr, kNumConnections, kFarMemSize)));
-  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-    fm_array_ptrs[i].reset(
-        manager->allocate_array_heap<snappy::FileBlock,
-                                     kUncompressedFileNumBlocks>());
-  }
+//  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
+//    fm_array_ptrs[i].reset(
+//        manager->allocate_array_heap<snappy::FileBlock,
+//                                     kUncompressedFileNumBlocks>());
+//  }
 //  fm_compress_files_bench("/mnt/enwik9.uncompressed",
 //                          "/mnt/enwik9.compressed.tmp");
   array_test();
