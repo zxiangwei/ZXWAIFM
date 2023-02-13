@@ -122,6 +122,7 @@ template<uint64_t kNumBlocks, bool TpAPI>
 void call_compress(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr) {
   fm_array_ptr->flush();
   rpc::BufferPtr args, ret;
+  args = rpc::SerializeArgsToBuffer();
   LOG("Start Call SnappyCompress");
   bool success = fm_array_ptr->call("SnappyCompress", args, ret);
   LOG_ASSERT(success, "Call SnappyCompress Failed");
