@@ -234,7 +234,7 @@ void process_compute(tcpconn_t *c) {
 // Response:
 // |ret_len(2B)|ret|
 void process_call(tcpconn_t *c) {
-  FLOG("Start process call");
+//  FLOG("Start process call");
   uint16_t body_len;
   uint8_t req_header[Object::kDSIDSize + sizeof(body_len)];
 
@@ -244,7 +244,7 @@ void process_call(tcpconn_t *c) {
   auto ds_id = *reinterpret_cast<uint8_t *>(&req_header[0]);
   body_len = *reinterpret_cast<uint16_t *>(&req_header[Object::kDSIDSize]);
   assert(body_len <= TCPDevice::kMaxCallDataLen);
-  FLOG("Read Header Success(ds_id: %d, body_len: %d)", ds_id, body_len);
+//  FLOG("Read Header Success(ds_id: %d, body_len: %d)", ds_id, body_len);
 
   auto body_buffer = std::make_shared<rpc::Buffer>(body_len);
 
@@ -255,12 +255,18 @@ void process_call(tcpconn_t *c) {
 
   rpc::Serializer body_serializer(body_buffer);
   auto method = rpc::Get<std::string>(body_serializer);
-  FLOG("Read Body Success(method: %s)", method.c_str());
+//  FLOG("Read Body Success(method: %s)", method.c_str());
+  FLOG("Start Call method: %s", method.c_str());
+  auto start = std::chrono::steady_clock::now();
 
   rpc::BufferPtr ret_buffer;
   server.call(ds_id, method, body_buffer, ret_buffer);
+  auto end = std::chrono::steady_clock::now();
+  FLOG("Call method %s cost %ld us", method.c_str(),
+       std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
+
   uint16_t ret_len = ret_buffer->ReadableBytes(); // 没有处理大端小端
-  FLOG("Write Response(ret_len: %d)", ret_len);
+//  FLOG("Write Response(ret_len: %d)", ret_len);
 
   helpers::tcp_write2_until(c, &ret_len, sizeof(ret_len),
                             ret_buffer->GetReadPtr(), ret_len);
