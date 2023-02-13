@@ -68,7 +68,9 @@ void compress_files_bench(const string &in_file_path,
     if (i == 0) {
       snappy::Compress(in_str.data(), in_str.size(), &out_str);
     } else {
-      snappy::Compress((const char *)buffers[i - 1], kUncompressedFileSize,
+//      snappy::Compress((const char *)buffers[i - 1], kUncompressedFileSize,
+//                       &out_str);
+      snappy::Compress((const char *)buffers[i - 1], in_str.size(),
                        &out_str);
     }
   }
