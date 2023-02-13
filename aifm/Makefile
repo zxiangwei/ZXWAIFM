@@ -115,11 +115,11 @@ dep = $(obj:.o=.d)
 tcp_device_server_src = src/tcp_device_server.cpp
 tcp_device_server_obj = $(tcp_device_server_src:.cpp=.o)
 
-SNAPPY_LIB = -L$(AIFM_PATH)/snappy/build -lsnappy
+#SNAPPY_LIB = -L$(AIFM_PATH)/snappy/build -lsnappy
 
 override CXXFLAGS += -std=gnu++2a -fconcepts -Wno-unused-function
 CXXFLAGS := $(filter-out -std=gnu++17,$(CXXFLAGS))
-override LDFLAGS += -lnuma
+override LDFLAGS += -lnuma -L$(AIFM_PATH)/snappy/build -lsnappy
 
 all: bin/test_pointer_noswap bin/test_pointer_swap bin/test_pointer_concurrent bin/test_array_add bin/test_array_nt \
 bin/test_array_clock_replacement bin/tcp_device_server bin/tcp_device_server bin/test_tcp_pointer_swap \
