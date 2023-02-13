@@ -256,14 +256,14 @@ void process_call(tcpconn_t *c) {
   rpc::Serializer body_serializer(body_buffer);
   auto method = rpc::Get<std::string>(body_serializer);
 //  FLOG("Read Body Success(method: %s)", method.c_str());
-  FLOG("Start Call method: %s", method.c_str());
-  auto start = std::chrono::steady_clock::now();
+//  FLOG("Start Call method: %s", method.c_str());
+//  auto start = std::chrono::steady_clock::now();
 
   rpc::BufferPtr ret_buffer;
   server.call(ds_id, method, body_buffer, ret_buffer);
-  auto end = std::chrono::steady_clock::now();
-  FLOG("Call method %s cost %ld us", method.c_str(),
-       std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
+//  auto end = std::chrono::steady_clock::now();
+//  FLOG("Call method %s cost %ld us", method.c_str(),
+//       std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
 
   uint16_t ret_len = ret_buffer->ReadableBytes(); // 没有处理大端小端
 //  FLOG("Write Response(ret_len: %d)", ret_len);
