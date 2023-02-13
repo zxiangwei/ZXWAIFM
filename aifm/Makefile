@@ -1,9 +1,10 @@
+AIFM_PATH=.
 SHENANGO_PATH=../shenango
 include $(SHENANGO_PATH)/shared.mk
 
 librt_libs = $(SHENANGO_PATH)/bindings/cc/librt++.a
 INC += -I$(SHENANGO_PATH)/bindings/cc -I$(SHENANGO_PATH)/ksched -Iinc \
-       -IDataFrame/AIFM/include/
+       -IDataFrame/AIFM/include/ -I$(AIFM_PATH)/snappy -I$(AIFM_PATH)/snappy/build
 
 test_pointer_noswap_src = test/test_pointer_noswap.cpp
 test_pointer_noswap_obj = $(test_pointer_noswap_src:.cpp=.o)
@@ -114,6 +115,8 @@ dep = $(obj:.o=.d)
 tcp_device_server_src = src/tcp_device_server.cpp
 tcp_device_server_obj = $(tcp_device_server_src:.cpp=.o)
 
+SNAPPY_LIB = -L$(AIFM_PATH)/snappy/build -lsnappy
+
 override CXXFLAGS += -std=gnu++2a -fconcepts -Wno-unused-function
 CXXFLAGS := $(filter-out -std=gnu++17,$(CXXFLAGS))
 override LDFLAGS += -lnuma
@@ -176,7 +179,7 @@ bin/test_tcp_hopscotch_gc_parallel: $(test_tcp_hopscotch_gc_parallel_obj) $(libr
 	$(LDXX) -o $@ $(test_tcp_hopscotch_gc_parallel_obj) $(lib_obj) $(librt_libs) $(RUNTIME_LIBS) $(LDFLAGS)
 
 bin/tcp_device_server: $(tcp_device_server_obj) $(lib_obj)
-	$(LDXX) -o $@ $(tcp_device_server_obj) $(lib_obj) $(librt_libs) $(RUNTIME_LIBS) $(LDFLAGS)
+	$(LDXX) -o $@ $(tcp_device_server_obj) $(lib_obj) $(librt_libs) $(RUNTIME_LIBS) $(LDFLAGS) $(SNAPPY_LIB)
 
 bin/test_slab: $(test_slab_obj) $(librt_libs) $(RUNTIME_DEPS) $(lib_obj)
 	$(LDXX) -o $@ $(test_slab_obj) $(lib_obj) $(librt_libs) $(RUNTIME_LIBS) $(LDFLAGS)

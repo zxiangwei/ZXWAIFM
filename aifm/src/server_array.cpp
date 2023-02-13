@@ -1,5 +1,7 @@
 #include "server_array.hpp"
 
+#include "snappy.h"
+
 namespace far_memory {
 
 void ServerArray::read_object(uint8_t obj_id_len, const uint8_t *obj_id, uint16_t *data_len, uint8_t *data_buf) {
@@ -41,6 +43,10 @@ void ServerArray::call(const std::string &method, const rpc::BufferPtr &args,
   rpc::Serializer ret_serializer(ret);
   ret_serializer << reply.error_code;
   ret_serializer.WriteRaw(reply.ret->GetReadPtr(), reply.ret->ReadableBytes());
+}
+
+void ServerArray::SnappyCompress() {
+
 }
 
 ServerDS *ServerArrayFactory::build(uint32_t param_len, uint8_t *params) {

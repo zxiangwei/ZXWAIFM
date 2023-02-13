@@ -33,6 +33,7 @@ class ServerArray : public ServerDS {
   void RegisterRPCFuncs() {
     router_.Register("Add", Add);
     router_.Register("Read", [this](size_t index) { return Read(index); });
+    router_.Register("SnappyCompress", [this]() { SnappyCompress(); });
   }
 
   static int Add(int a, int b) { return a + b; }
@@ -40,6 +41,8 @@ class ServerArray : public ServerDS {
     if (index >= vec_.size()) return {};
     return vec_[index];
   }
+
+  void SnappyCompress();
 
   std::vector<std::vector<uint8_t>> vec_;
   uint32_t item_size_;

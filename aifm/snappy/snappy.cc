@@ -1008,7 +1008,7 @@ size_t Compress(Source* reader, Sink* writer) {
 
   internal::WorkingMemory wmem(N);
 
-  int idx_n = 0;
+//  int idx_n = 0;
 
 //  std::cout << "start compress" << std::endl;
 
@@ -1064,14 +1064,14 @@ size_t Compress(Source* reader, Sink* writer) {
 
     N -= num_to_read;
 
-    ++idx_n;
-    if (idx_n % 3 == 0) {
-      if (N >= FileBlock::kSize) {
-//        std::cout << idx_n << " skip " << num_to_read << std::endl;
-        reader->Skip(FileBlock::kSize);
-        N -= FileBlock::kSize;
-      }
-    }
+//    ++idx_n;
+//    if (idx_n % 3 == 0) {
+//      if (N >= FileBlock::kSize) {
+////        std::cout << idx_n << " skip " << num_to_read << std::endl;
+//        reader->Skip(FileBlock::kSize);
+//        N -= FileBlock::kSize;
+//      }
+//    }
 
     reader->Skip(pending_advance);
   }
