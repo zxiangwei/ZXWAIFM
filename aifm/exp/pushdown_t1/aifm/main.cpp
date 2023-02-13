@@ -69,6 +69,7 @@ void read_files_to_fm_array(const string &in_file_path) {
   if (fd == -1) {
     helpers::dump_core();
   }
+  LOG("open success")
   // Read file and save data into the far-memory array.
   int64_t sum = 0, cur = snappy::FileBlock::kSize, tmp;
   while (sum != kUncompressedFileSize) {
@@ -94,6 +95,7 @@ void read_files_to_fm_array(const string &in_file_path) {
   if (sum != kUncompressedFileSize) {
     helpers::dump_core();
   }
+  LOG("Read over");
 
   // Flush the cache to ensure there's no pending dirty data.
   flush_cache();
