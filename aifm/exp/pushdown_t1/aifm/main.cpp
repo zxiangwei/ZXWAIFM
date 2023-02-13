@@ -139,8 +139,9 @@ void fm_compress_files_bench(const string &in_file_path,
   auto start = chrono::steady_clock::now();
   for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
     std::cout << "Compressing file " << i << std::endl;
-    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+    fm_array_ptrs[i]->flush();
+//    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
