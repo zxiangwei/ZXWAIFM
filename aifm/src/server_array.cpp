@@ -11,7 +11,7 @@ void ServerArray::read_object(uint8_t obj_id_len, const uint8_t *obj_id, uint16_
   index = *reinterpret_cast<const uint64_t *>(obj_id);
 
   *data_len = item_size_; // 注意：这里由uint32_t缩小为uint16_t
-  __builtin_memcpy(data_buf, vec_[index].data(), item_size_);
+  __builtin_memcpy(data_buf, ItemData(index), item_size_);
 }
 
 void ServerArray::write_object(uint8_t obj_id_len, const uint8_t *obj_id, uint16_t data_len, const uint8_t *data_buf) {
@@ -21,7 +21,7 @@ void ServerArray::write_object(uint8_t obj_id_len, const uint8_t *obj_id, uint16
   index = *reinterpret_cast<const uint64_t *>(obj_id);
 
   assert(data_len == item_size_);
-  __builtin_memcpy(vec_[index].data(), data_buf, data_len);
+  __builtin_memcpy(ItemData(index), data_buf, data_len);
 }
 
 bool ServerArray::remove_object(uint8_t obj_id_len, const uint8_t *obj_id) {
@@ -46,7 +46,8 @@ void ServerArray::call(const std::string &method, const rpc::BufferPtr &args,
 }
 
 void ServerArray::SnappyCompress() {
-
+  std::string out_str;
+  snappy::Compress(reinterpret_cast<char *>(vec_.data()), vec_.size(), &out_str);
 }
 
 ServerDS *ServerArrayFactory::build(uint32_t param_len, uint8_t *params) {

@@ -12,8 +12,9 @@ namespace far_memory {
 class ServerArray : public ServerDS {
  public:
   explicit ServerArray(uint64_t num_items, uint32_t item_size)
-      : vec_(num_items, std::vector<uint8_t>(item_size)),
-        item_size_(item_size) {
+      : num_items_(num_items),
+        item_size_(item_size),
+        vec_(num_items * item_size){
     RegisterRPCFuncs();
   }
   ~ServerArray() override = default;
@@ -30,6 +31,10 @@ class ServerArray : public ServerDS {
             rpc::BufferPtr &ret);
 
  private:
+  uint8_t *ItemData(size_t index) {
+    return vec_.data() + index * item_size_;
+  }
+
   void RegisterRPCFuncs() {
     router_.Register("Add", Add);
     router_.Register("Read", [this](size_t index) { return Read(index); });
@@ -39,13 +44,16 @@ class ServerArray : public ServerDS {
   static int Add(int a, int b) { return a + b; }
   std::vector<uint8_t> Read(size_t index) {
     if (index >= vec_.size()) return {};
-    return vec_[index];
+    std::vector<uint8_t> ret(item_size_);
+    std::memcpy(ret.data(), ItemData(index), item_size_);
+    return ret;
   }
 
   void SnappyCompress();
 
-  std::vector<std::vector<uint8_t>> vec_;
+  uint64_t num_items_;
   uint32_t item_size_;
+  std::vector<uint8_t> vec_;
   rpc::RpcRouter router_;
 //  ReaderWriterLock lock_; // 暂时不使用锁
 };
