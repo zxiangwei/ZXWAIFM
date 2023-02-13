@@ -128,10 +128,10 @@ void fm_compress_files_bench(const string &in_file_path,
   auto start = chrono::steady_clock::now();
   for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
     std::cout << "Compressing file " << i << std::endl;
-//    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
+    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
         fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+//    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
   }
@@ -190,14 +190,14 @@ void do_work(netaddr raddr) {
   auto manager = std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
       kCacheSize, kNumGCThreads,
       new TCPDevice(raddr, kNumConnections, kFarMemSize)));
-//  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-//    fm_array_ptrs[i].reset(
-//        manager->allocate_array_heap<snappy::FileBlock,
-//                                     kUncompressedFileNumBlocks>());
-//  }
-//  fm_compress_files_bench("/mnt/enwik9.uncompressed",
-//                          "/mnt/enwik9.compressed.tmp");
-  array_test();
+  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
+    fm_array_ptrs[i].reset(
+        manager->allocate_array_heap<snappy::FileBlock,
+                                     kUncompressedFileNumBlocks>());
+  }
+  fm_compress_files_bench("/mnt/enwik9.uncompressed",
+                          "/mnt/enwik9.compressed.tmp");
+//  array_test();
 
   std::cout << "Force existing..." << std::endl;
   exit(0);
