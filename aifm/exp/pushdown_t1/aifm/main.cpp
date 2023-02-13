@@ -32,6 +32,13 @@ constexpr bool kUseTpAPI = false;
 
 using namespace std;
 
+#define LOG_ASSERT(expr, fmt, ...) \
+  if (!(expr)) {                     \
+    printf(fmt "\n", ##__VA_ARGS__);                                 \
+  }
+
+#define LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__);
+
 alignas(4096) snappy::FileBlock file_block;
 std::unique_ptr<Array<snappy::FileBlock, kUncompressedFileNumBlocks>>
     fm_array_ptrs[kNumUncompressedFiles];
@@ -124,7 +131,9 @@ void bench_farmem_load(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
 void fm_compress_files_bench(const string &in_file_path,
                              const string &out_file_path) {
   string out_str;
+  LOG("Start");
   read_files_to_fm_array(in_file_path);
+  LOG("Read over");
   auto start = chrono::steady_clock::now();
   for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
     std::cout << "Compressing file " << i << std::endl;
@@ -142,13 +151,6 @@ void fm_compress_files_bench(const string &in_file_path,
 
   // write_file_to_string(out_file_path, out_str);
 }
-
-#define LOG_ASSERT(expr, fmt, ...) \
-  if (!(expr)) {                     \
-    printf(fmt "\n", ##__VA_ARGS__);                                 \
-  }
-
-#define LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__);
 
 void array_test() {
   constexpr uint64_t kIntArraySize = 1000;
