@@ -338,7 +338,7 @@ void TCPDevice::_compute(tcpconn_t *remote_slave, uint8_t ds_id, uint8_t opcode,
   }
 }
 
-#define RPC_LOG_ON 1
+#define RPC_LOG_ON 0
 
 #if RPC_LOG_ON
 #define RPC_LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__);
