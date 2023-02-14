@@ -6,13 +6,13 @@
 #include "prefetcher_leap.hpp"
 #include "prefetcher_lr.hpp"
 #include "cost_estimator.hpp"
+#include "rpc_router.hpp"
 
 #include <cstdint>
 #include <limits>
 #include <memory>
 #include <tuple>
 #include <utility>
-#include <unordered_map>
 
 namespace far_memory {
 
@@ -32,7 +32,8 @@ protected:
   uint32_t kItemSize_;
   bool dynamic_prefetch_enabled_ = true;
   bool dirty_ = false;
-  std::unordered_map<std::string, std::shared_ptr<CostEstimator>> cost_estimator_;
+  CostEstimatorMap cost_estimator_map_;
+  rpc::RpcRouter rpc_router_;
   constexpr static auto kInduceFn = [](Index_t idx_0,
                                        Index_t idx_1) -> Pattern_t {
     return GenericArray::induce_fn(idx_0, idx_1);
@@ -53,7 +54,6 @@ protected:
   NOT_COPYABLE(GenericArray);
   NOT_MOVEABLE(GenericArray);
 
-  virtual void snappy_compress_local();
 public:
   void disable_prefetch();
   void enable_prefetch();
@@ -63,7 +63,6 @@ public:
   void flush();
   bool call(const std::string &method, const rpc::BufferPtr &args,
             rpc::BufferPtr &ret);
-  void snappy_compress();
 };
 
 template <typename T, uint64_t... Dims> class Array : public GenericArray {
@@ -87,7 +86,7 @@ private:
     return N * _size(rest_dims...);
   }
 
-  void snappy_compress_local() override;
+  void snappy_compress_local();
 
 public:
   static constexpr uint64_t kSize = _size(Dims...);

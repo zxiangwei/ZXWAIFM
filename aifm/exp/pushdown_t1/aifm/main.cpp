@@ -125,7 +125,7 @@ void call_compress(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr) {
   args = rpc::SerializeArgsToBuffer();
 //  LOG("Start Call SnappyCompress");
   bool success = fm_array_ptr->call("SnappyCompress", args, ret);
-//  LOG_ASSERT(success, "Call SnappyCompress Failed");
+  LOG_ASSERT(success, "Call SnappyCompress Failed");
 }
 
 template<uint64_t kNumBlocks, bool TpAPI>
@@ -149,12 +149,12 @@ void fm_compress_files_bench(const string &in_file_path,
   auto start = chrono::steady_clock::now();
   for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
     std::cout << "Compressing file " << i << std::endl;
-    fm_array_ptrs[i]->snappy_compress();
+//    fm_array_ptrs[i]->snappy_compress();
 //    fm_array_ptrs[i]->flush();
 //    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-//    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-//        fm_array_ptrs[i].get());
+    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+        fm_array_ptrs[i].get());
 //    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(

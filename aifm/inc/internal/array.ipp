@@ -37,14 +37,19 @@ FORCE_INLINE GenericUniquePtr *GenericArray::at(bool nt, Index_t idx) {
 
 template <typename T, uint64_t... Dims>
 FORCE_INLINE Array<T, Dims...>::Array(FarMemManager *manager)
-    : GenericArray(manager, sizeof(T), kSize) {}
+    : GenericArray(manager, sizeof(T), kSize) {
+  if constexpr(std::is_same_v<T, snappy::FileBlock>) {
+    rpc_router_.Register("SnappyCompress", [this]() { snappy_compress_local(); });
+  }
+}
 
 template <typename T, uint64_t... Dims>
 FORCE_INLINE void Array<T, Dims...>::snappy_compress_local() {
-  constexpr bool kUseTpAPI = false;
-  std::string out_str;
-  snappy::Compress<kSize, kUseTpAPI>(
-      this, kSize, &out_str);
+  if constexpr(std::is_same_v<T, snappy::FileBlock>) {
+    constexpr bool kUseTpAPI = false;
+    std::string out_str;
+    snappy::Compress<kSize, kUseTpAPI>(this, kSize, &out_str);
+  }
 }
 
 template <typename T, uint64_t... Dims>

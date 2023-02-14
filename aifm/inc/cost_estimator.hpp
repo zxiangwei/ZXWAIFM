@@ -3,6 +3,8 @@
 
 #include <chrono>
 #include <memory>
+#include <string>
+#include <unordered_map>
 
 namespace far_memory {
 
@@ -95,6 +97,30 @@ class CostEstimator {
   std::chrono::steady_clock::time_point start_;
 };
 
+using CostEstimatorPtr = std::shared_ptr<CostEstimator>;
+
+class CostEstimatorMap {
+ public:
+  CostEstimatorMap() = default;
+
+  void Set(const std::string &method, const CostEstimatorPtr &estimator) {
+    method_to_estimator_[method] = estimator;
+  }
+
+  CostEstimatorPtr Get(const std::string &method) {
+    if (!method_to_estimator_.count(method)) {
+      method_to_estimator_[method] = DefaultEstimator();
+    }
+    return method_to_estimator_[method];
+  }
+ private:
+  static CostEstimatorPtr DefaultEstimator() {
+    return std::make_shared<CostEstimator>();
+  }
+
+  std::unordered_map<std::string, CostEstimatorPtr> method_to_estimator_;
 };
+
+} // namespace far_memory
 
 #endif //COST_ESTIMATOR_HPP_
