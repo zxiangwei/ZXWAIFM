@@ -31,6 +31,7 @@ class CostEstimator {
         pushdown_ratio_(kDefaultPushdownRatio) {}
 
   void StartBench() {
+    COST_LOG("StartBench");
     start_ = std::chrono::steady_clock::now();
   }
   void FlushOver(uint64_t flush_bytes) {

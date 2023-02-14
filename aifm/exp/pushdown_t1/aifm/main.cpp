@@ -125,7 +125,6 @@ void call_compress(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr) {
     snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
         fm_array_ptr, kUncompressedFileSize, &out_str);
   });
-  fm_array_ptr->flush();
   rpc::BufferPtr args, ret;
   args = rpc::SerializeArgsToBuffer();
 //  LOG("Start Call SnappyCompress");
