@@ -3,6 +3,8 @@
 #include "manager.hpp"
 #include "pointer.hpp"
 
+//#include "snappy.h"
+
 namespace far_memory {
 
 GenericArray::GenericArray(FarMemManager *manager, uint32_t item_size,
@@ -26,6 +28,8 @@ GenericArray::GenericArray(FarMemManager *manager, uint32_t item_size,
   }
   kItemSize_ = item_size;
   kNumItems_ = num_items;
+
+  cost_estimator_["snappy_compress"] =  std::make_shared<CostEstimator>();
 }
 
 GenericArray::~GenericArray() {
@@ -56,6 +60,38 @@ void GenericArray::flush() {
 
 bool GenericArray::call(const std::string &method, const rpc::BufferPtr &args, rpc::BufferPtr &ret) {
   return FarMemManagerFactory::get()->call(ds_id_, method, args, ret);
+}
+
+void GenericArray::snappy_compress() {
+  auto estimator = cost_estimator_["snappy_compress"];
+  uint64_t flush_bytes = 0, load_bytes = 0;
+  // 统计 flush_bytes 和 load_bytes
+  for (uint64_t i = 0; i < kNumItems_; ++i) {
+    if (!ptrs_[i].is_present()) {
+      load_bytes += kItemSize_;
+    } else if (ptrs_[i].is_dirty()){
+      flush_bytes += kItemSize_;
+    }
+  }
+  if (estimator->SuggestPushdown(flush_bytes, load_bytes)) {
+    estimator->StartBench();
+    flush();
+    estimator->FlushOver(flush_bytes);
+    rpc::BufferPtr args, ret;
+    args = rpc::SerializeArgsToBuffer();
+    estimator->StartBench();
+    FarMemManagerFactory::get()->call(ds_id_, "SnappyCompress", args, ret);
+    estimator->ComputeInMemoryOver(ret->ReadableBytes());
+  } else {
+    estimator->StartBench();
+    snappy_compress_local();
+    estimator->ComputeInProcessorOver(load_bytes);
+  }
+}
+
+void GenericArray::snappy_compress_local() {
+//    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        this, kUncompressedFileSize, &out_str);
 }
 
 void GenericArray::disable_prefetch() {

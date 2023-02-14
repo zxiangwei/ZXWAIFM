@@ -185,6 +185,18 @@ retry:
                    sizeof(reset_value));
 }
 
+bool GenericFarMemPtr::is_present() const {
+  return meta_.is_present();
+}
+
+bool GenericFarMemPtr::is_dirty() const {
+  return meta_.is_dirty();
+}
+
+uint16_t GenericFarMemPtr::get_object_size() const {
+  return meta_.get_object_size();
+}
+
 void GenericUniquePtr::_free() {
   assert(!meta().is_null());
   assert(meta().is_present());

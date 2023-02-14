@@ -115,6 +115,9 @@ public:
   void swap_in(bool nt);
   void flush();
   void move(GenericFarMemPtr &other, uint64_t reset_value);
+  bool is_present() const;
+  bool is_dirty() const;
+  uint16_t get_object_size() const;
 };
 
 class GenericUniquePtr : public GenericFarMemPtr {

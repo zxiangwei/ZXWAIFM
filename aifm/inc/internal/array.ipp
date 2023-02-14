@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers.hpp"
+#include "snappy.h"
 
 #include <cstddef>
 #include <stdexcept>
@@ -37,6 +38,14 @@ FORCE_INLINE GenericUniquePtr *GenericArray::at(bool nt, Index_t idx) {
 template <typename T, uint64_t... Dims>
 FORCE_INLINE Array<T, Dims...>::Array(FarMemManager *manager)
     : GenericArray(manager, sizeof(T), kSize) {}
+
+template <typename T, uint64_t... Dims>
+FORCE_INLINE void Array<T, Dims...>::snappy_compress_local() {
+  constexpr bool kUseTpAPI = false;
+  std::string out_str;
+  snappy::Compress<kSize, kUseTpAPI>(
+      this, kSize, &out_str);
+}
 
 template <typename T, uint64_t... Dims>
 template <auto DimIdx>
