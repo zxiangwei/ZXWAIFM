@@ -3,8 +3,6 @@
 #include "manager.hpp"
 #include "pointer.hpp"
 
-//#include "snappy.h"
-
 namespace far_memory {
 
 GenericArray::GenericArray(FarMemManager *manager, uint32_t item_size,

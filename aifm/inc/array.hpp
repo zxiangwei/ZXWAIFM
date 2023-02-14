@@ -63,6 +63,11 @@ public:
   void flush();
   bool call(const std::string &method, const rpc::BufferPtr &args,
             rpc::BufferPtr &ret);
+
+  template<typename F>
+  void register_local(const std::string &method, F func) {
+    rpc_router_.Register(method, func);
+  }
 };
 
 template <typename T, uint64_t... Dims> class Array : public GenericArray {
@@ -85,8 +90,6 @@ private:
   static constexpr uint64_t _size(uint64_t N, Args... rest_dims) {
     return N * _size(rest_dims...);
   }
-
-  void snappy_compress_local();
 
 public:
   static constexpr uint64_t kSize = _size(Dims...);

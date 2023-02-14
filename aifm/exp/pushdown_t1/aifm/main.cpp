@@ -120,6 +120,11 @@ void do_something(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
 
 template<uint64_t kNumBlocks, bool TpAPI>
 void call_compress(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr) {
+  fm_array_ptr->register_local("SnappyCompress", [fm_array_ptr]() {
+    std::string out_str;
+    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+        fm_array_ptr, kUncompressedFileSize, &out_str);
+  });
   fm_array_ptr->flush();
   rpc::BufferPtr args, ret;
   args = rpc::SerializeArgsToBuffer();
