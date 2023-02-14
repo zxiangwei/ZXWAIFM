@@ -63,6 +63,9 @@ bool GenericArray::call(const std::string &method, const rpc::BufferPtr &args, r
 }
 
 void GenericArray::snappy_compress() {
+  // 其实可以考虑在Array内部添加一个RPCRouter
+  // 本地调用通过本地的RPCRouter来进行，远程调用通过ServerArray的RPCRouter来进行
+  // 不过这要求两者具有相同的参数数量和类型
   auto estimator = cost_estimator_["snappy_compress"];
   uint64_t flush_bytes = 0, load_bytes = 0;
   // 统计 flush_bytes 和 load_bytes
