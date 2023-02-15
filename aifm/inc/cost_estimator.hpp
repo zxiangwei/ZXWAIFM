@@ -21,6 +21,8 @@ class CostEstimator {
  public:
   static constexpr double kDefaultPMRatio = 0.9;
   static constexpr double kDefaultPushdownRatio = 0.95;
+  static constexpr uint64_t kDefaultInternetSpeed = 10000000;
+  static constexpr uint64_t kSToUs = 1000000;
 
   CostEstimator()
       : internet_speed_(0),
@@ -31,12 +33,11 @@ class CostEstimator {
         pushdown_ratio_(kDefaultPushdownRatio) {}
 
   void StartBench() {
-    COST_LOG("StartBench");
     start_ = std::chrono::steady_clock::now();
   }
   void FlushOver(uint64_t flush_bytes) {
     uint64_t us = EndBench();
-    uint64_t speed = flush_bytes / us;
+    uint64_t speed = (flush_bytes == 0) ? kDefaultInternetSpeed : ((flush_bytes * kSToUs) / us);
     COST_LOG("flush %ld bytes with %ld us, speed: %ld", flush_bytes, us, speed);
     if (internet_speed_ == 0) { // 第一次
       internet_speed_ = speed;
@@ -46,7 +47,7 @@ class CostEstimator {
   }
   void ComputeInMemoryOver(uint64_t ret_bytes) {
     uint64_t us = EndBench();
-    uint64_t rtime = ret_bytes / internet_speed_;
+    uint64_t rtime = (ret_bytes * kSToUs) / internet_speed_;
     uint64_t mtime = us - rtime;
     uint64_t ptime = static_cast<uint64_t>(static_cast<double>(mtime) * pm_ratio_);
     COST_LOG("compute in memory return %ld bytes with %ld us, rtime: %ld, mtime: %ld, ptime: %ld",
@@ -63,7 +64,7 @@ class CostEstimator {
   }
   void ComputeInProcessorOver(uint64_t load_bytes) {
     uint64_t us = EndBench();
-    uint64_t ptime = us - load_bytes / internet_speed_;
+    uint64_t ptime = us - ((load_bytes * kSToUs) / internet_speed_);
     COST_LOG("compute in processor load %ld bytes with %ld us, ptime: %ld",
              load_bytes, us, ptime);
     compute_in_processor_time_ = (compute_in_processor_time_ + ptime) >> 1;
@@ -74,8 +75,8 @@ class CostEstimator {
 
   bool SuggestPushdown(uint64_t flush_bytes, uint64_t load_bytes) {
     if (compute_in_memory_time_ == 0) return true;
-    uint64_t ptime = flush_bytes / internet_speed_ + compute_in_memory_time_ + ret_time_;
-    uint64_t nptime = load_bytes / internet_speed_ + compute_in_processor_time_;
+    uint64_t ptime = (flush_bytes * kSToUs) / internet_speed_ + compute_in_memory_time_ + ret_time_;
+    uint64_t nptime = (load_bytes * kSToUs) / internet_speed_ + compute_in_processor_time_;
     uint64_t tmp = static_cast<uint64_t>(static_cast<double>(ptime) * pushdown_ratio_);
     COST_LOG("suggest_pushdown(flush %ld bytes, load %ld bytes, ptime: %ld, nptime: %ld, tmp: %ld): %s",
              flush_bytes, load_bytes, ptime, nptime, tmp,
@@ -89,7 +90,7 @@ class CostEstimator {
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start_).count();
   }
 
-  uint64_t internet_speed_; // 单位为 byte/us
+  uint64_t internet_speed_; // 单位为 byte/s
   uint64_t compute_in_memory_time_;  // 单位为 us
   uint64_t compute_in_processor_time_;  // 单位为 us
   uint64_t ret_time_; // 单位为 us
