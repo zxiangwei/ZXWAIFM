@@ -21,7 +21,7 @@ class CostEstimator {
  public:
   static constexpr double kDefaultPMRatio = 0.9;
   static constexpr double kDefaultPushdownRatio = 0.95;
-  static constexpr uint64_t kDefaultInternetSpeed = 100000000;
+  static constexpr uint64_t kDefaultInternetSpeed = 30000000;
   static constexpr uint64_t kSToUs = 1000000;
 
   CostEstimator()
@@ -31,6 +31,9 @@ class CostEstimator {
         ret_time_(0),
         pm_ratio_(kDefaultPMRatio),
         pushdown_ratio_(kDefaultPushdownRatio) {}
+
+  void SetUserData(void *user_data) { user_data_ = user_data; }
+  void *GetUserData() { return user_data_; }
 
   void StartBench() {
     start_ = std::chrono::steady_clock::now();
@@ -97,6 +100,7 @@ class CostEstimator {
   double pm_ratio_; // processor计算时间 / memory计算时间
   double pushdown_ratio_;
   std::chrono::steady_clock::time_point start_;
+  void *user_data_;
 };
 
 using CostEstimatorPtr = std::shared_ptr<CostEstimator>;
