@@ -21,7 +21,7 @@ class CostEstimator {
  public:
   static constexpr double kDefaultPMRatio = 0.9;
   static constexpr double kDefaultPushdownRatio = 0.95;
-  static constexpr uint64_t kDefaultInternetSpeed = 30000000;
+  static constexpr uint64_t kDefaultInternetSpeed = 300000000;
   static constexpr uint64_t kSToUs = 1000000;
 
   CostEstimator()
