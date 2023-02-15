@@ -130,8 +130,8 @@ void call_compress(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr) {
 //  LOG("Start Call SnappyCompress");
   bool success = fm_array_ptr->call("SnappyCompress", args, ret);
   LOG_ASSERT(success, "Call SnappyCompress Failed");
-//  success = fm_array_ptr->call("SnappyCompress", args, ret);
-//  LOG_ASSERT(success, "Call SnappyCompress Failed");
+  success = fm_array_ptr->call("SnappyCompress", args, ret);
+  LOG_ASSERT(success, "Call SnappyCompress Failed");
 }
 
 template<uint64_t kNumBlocks, bool TpAPI>
