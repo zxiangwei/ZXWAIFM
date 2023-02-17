@@ -22,6 +22,26 @@ GenericArray::GenericArray(FarMemManager *manager, uint32_t item_size,
 
 GenericArray::~GenericArray() {}
 
+void GenericArray::flush() {
+  std::vector<rt::Thread> threads;
+  for (uint32_t tid = 0; tid < helpers::kNumCPUs; tid++) {
+    threads.emplace_back([&, tid]() {
+      auto num_tasks_per_threads =
+          (kNumItems_ == 0)
+          ? 0
+          : (kNumItems_ - 1) / helpers::kNumCPUs + 1;
+      auto left = num_tasks_per_threads * tid;
+      auto right = std::min(left + num_tasks_per_threads, kNumItems_);
+      for (uint64_t i = left; i < right; i++) {
+        ptrs_[i].flush();
+      }
+    });
+  }
+  for (auto &thread : threads) {
+    thread.Join();
+  }
+}
+
 void GenericArray::disable_prefetch() {
   ACCESS_ONCE(dynamic_prefetch_enabled_) = false;
 }

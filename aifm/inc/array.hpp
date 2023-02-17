@@ -52,6 +52,8 @@ public:
   void enable_prefetch();
   void static_prefetch(Index_t start, Index_t step, uint32_t num);
   GenericUniquePtr *at(bool nt, Index_t idx);
+
+  void flush();
 };
 
 template <typename T, uint64_t... Dims> class Array : public GenericArray {

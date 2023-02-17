@@ -5,7 +5,7 @@
 
 template<typename Key, typename Value>
 class LRUCache {
-  static constexpr bool kDisabled = false;
+  static constexpr bool kDisabled = true;
  public:
 
   explicit LRUCache(size_t capacity) : capacity_(capacity) {
