@@ -75,7 +75,7 @@ private:
     return N * _size(rest_dims...);
   }
 
-  static constexpr int kLRUCacheSize = 100;
+  static constexpr int kLRUCacheSize = 512;
 
   LRUCache<int, T> lru_cache_{kLRUCacheSize};
 
