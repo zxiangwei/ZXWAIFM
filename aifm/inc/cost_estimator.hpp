@@ -35,10 +35,10 @@ class CostEstimator {
   void SetUserData(void *user_data) { user_data_ = user_data; }
   void *GetUserData() { return user_data_; }
 
-  void StartBench() {
+  virtual void StartBench() {
     start_ = std::chrono::steady_clock::now();
   }
-  void FlushOver(uint64_t flush_bytes) {
+  virtual void FlushOver(uint64_t flush_bytes) {
     uint64_t us = EndBench();
     uint64_t speed = (flush_bytes == 0) ? kDefaultInternetSpeed : ((flush_bytes * kSToUs) / us);
     COST_LOG("flush %ld bytes with %ld us, speed: %ld", flush_bytes, us, speed);
@@ -48,7 +48,7 @@ class CostEstimator {
       internet_speed_ = (internet_speed_ + speed) >> 1;
     }
   }
-  void ComputeInMemoryOver(uint64_t ret_bytes) {
+  virtual void ComputeInMemoryOver(uint64_t ret_bytes) {
     uint64_t us = EndBench();
     uint64_t rtime = (ret_bytes * kSToUs) / internet_speed_;
     uint64_t mtime = us - rtime;
@@ -65,7 +65,7 @@ class CostEstimator {
       compute_in_processor_time_ = (compute_in_processor_time_ + ptime) >> 1;
     }
   }
-  void ComputeInProcessorOver(uint64_t load_bytes) {
+  virtual void ComputeInProcessorOver(uint64_t load_bytes) {
     uint64_t us = EndBench();
     uint64_t ptime = us - ((load_bytes * kSToUs) / internet_speed_);
     COST_LOG("compute in processor load %ld bytes with %ld us, ptime: %ld",
@@ -76,7 +76,7 @@ class CostEstimator {
     COST_LOG("pm_ratio change to %f", pm_ratio_);
   }
 
-  bool SuggestPushdown(uint64_t flush_bytes, uint64_t load_bytes) {
+  virtual bool SuggestPushdown(uint64_t flush_bytes, uint64_t load_bytes) {
     if (compute_in_memory_time_ == 0) return true;
     uint64_t ptime = (flush_bytes * kSToUs) / internet_speed_ + compute_in_memory_time_ + ret_time_;
     uint64_t nptime = (load_bytes * kSToUs) / internet_speed_ + compute_in_processor_time_;
@@ -88,7 +88,7 @@ class CostEstimator {
   }
 
  protected:
-  uint64_t EndBench() {
+  virtual uint64_t EndBench() {
     auto end = std::chrono::steady_clock::now();
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start_).count();
   }
