@@ -50,6 +50,7 @@ void flush_cache() {
   for (uint32_t i = 0; i < kUncompressedFileNumBlocks; i++) {
     for (uint32_t k = 0; k < kReadFileBlockNum; k++) {
       file_block = fm_array_ptrs[k]->read(i);
+      printf("access %d of %d\n", k, i);
       ACCESS_ONCE(file_block.data[0]);
     }
   }

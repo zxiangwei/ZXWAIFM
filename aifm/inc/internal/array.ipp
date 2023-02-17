@@ -88,10 +88,12 @@ FORCE_INLINE const T &Array<T, Dims...>::at(const DerefScope &scope,
                                             Indices... indices) noexcept {
   auto idx = get_flat_idx(indices...);
   if (lru_cache_.has(idx)) {
+    printf("get %ld\n", idx);
     return lru_cache_.get(idx);
   }
   auto ptr = reinterpret_cast<UniquePtr<T> *>(GenericArray::at(Nt, idx));
   auto deref_ptr = ptr->template deref<Nt>(scope);
+  printf("set %ld\n", idx);
   lru_cache_.set(idx, *deref_ptr);
   return *deref_ptr;
 }
