@@ -29,7 +29,7 @@ constexpr uint64_t kUncompressedFileNumBlocks =
     ((kUncompressedFileSize - 1) / snappy::FileBlock::kSize) + 1;
 constexpr uint32_t kNumUncompressedFiles = 16;
 constexpr bool kUseTpAPI = false;
-constexpr uint64_t kReadFileBlockNum = 768;
+constexpr uint64_t kReadFileBlockNum = 512;
 
 using namespace std;
 
@@ -127,7 +127,7 @@ void fm_compress_files_bench(const string &in_file_path,
   read_files_to_fm_array(in_file_path);
   auto start = chrono::steady_clock::now();
   for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-    std::cout << "Compressing file " << i << std::endl;
+//    std::cout << "Compressing file " << i << std::endl;
 //    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
     do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
