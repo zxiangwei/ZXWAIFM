@@ -47,19 +47,19 @@ void flush_cache() {
   for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
     fm_array_ptrs[k]->disable_prefetch();
   }
-//  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-//    for (uint32_t k = 0; k < kReadFileBlockNum; k++) {
-//      file_block = fm_array_ptrs[i]->read(k);
-//      ACCESS_ONCE(file_block.data[0]);
-//    }
-//  }
   for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-    fm_array_ptrs[i]->flush();
-//    for (uint32_t k = 0; k < kReadFileBlockNum; k++) {
-//      file_block = fm_array_ptrs[i]->read(k);
-//      ACCESS_ONCE(file_block.data[0]);
-//    }
+    for (uint32_t k = 0; k < kReadFileBlockNum; k++) {
+      file_block = fm_array_ptrs[i]->read(k);
+      ACCESS_ONCE(file_block.data[0]);
+    }
   }
+//  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
+//    fm_array_ptrs[i]->flush();
+////    for (uint32_t k = 0; k < kReadFileBlockNum; k++) {
+////      file_block = fm_array_ptrs[i]->read(k);
+////      ACCESS_ONCE(file_block.data[0]);
+////    }
+//  }
 //  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
 //    fm_array_ptrs[k]->enable_prefetch();
 //  }
