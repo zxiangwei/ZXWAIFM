@@ -47,10 +47,9 @@ void flush_cache() {
   for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
     fm_array_ptrs[k]->disable_prefetch();
   }
-  for (uint32_t i = 0; i < kUncompressedFileNumBlocks; i++) {
+  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
     for (uint32_t k = 0; k < kReadFileBlockNum; k++) {
-      file_block = fm_array_ptrs[k]->read(i);
-      printf("access %d of %d\n", k, i);
+      file_block = fm_array_ptrs[i]->read(k);
       ACCESS_ONCE(file_block.data[0]);
     }
   }
