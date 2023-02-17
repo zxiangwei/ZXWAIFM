@@ -8,7 +8,7 @@ class LRUCache {
   static constexpr bool kDisabled = false;
  public:
 
-  explicit LRUCache(int capacity) : capacity_(capacity) {
+  explicit LRUCache(size_t capacity) : capacity_(capacity) {
   }
 
   bool has(const Key &key) {
@@ -49,7 +49,7 @@ class LRUCache {
     key_to_iter_[key] = kv_list_.insert(kv_list_.end(), std::make_pair(key, value));
   }
  private:
-  int capacity_;
+  size_t capacity_;
   std::list<std::pair<Key, Value>> kv_list_;
   std::unordered_map<Key, typename decltype(kv_list_)::iterator> key_to_iter_;
 };

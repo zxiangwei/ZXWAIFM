@@ -89,8 +89,12 @@ void read_files_to_fm_array(const string &in_file_path) {
     helpers::dump_core();
   }
 
+  std::cout << "Read over" << std::endl;
+
   // Flush the cache to ensure there's no pending dirty data.
   flush_cache();
+
+  std::cout << "Flush over" << std::endl;
 
   close(fd);
 }
