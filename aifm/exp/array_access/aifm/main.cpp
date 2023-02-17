@@ -29,7 +29,7 @@ constexpr uint64_t kUncompressedFileNumBlocks =
     ((kUncompressedFileSize - 1) / snappy::FileBlock::kSize) + 1;
 constexpr uint32_t kNumUncompressedFiles = 16;
 constexpr bool kUseTpAPI = false;
-constexpr uint64_t kReadFileBlockNum = 512;
+constexpr uint64_t kReadFileBlockNum = 768;
 
 using namespace std;
 
@@ -110,8 +110,8 @@ void read_files_to_fm_array(const string &in_file_path) {
 template<uint64_t kNumBlocks, bool TpAPI>
 void do_something(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
                   size_t input_length, std::string *compressed) {
-  for (uint64_t i = 0; i < kReadFileBlockNum; ++i) {
-    auto block = fm_array_ptr->read(i);
+  for (uint64_t i = kReadFileBlockNum + 1; i > 0; --i) {
+    auto block = fm_array_ptr->read(i - 1);
     DONT_OPTIMIZE(block);
   }
 }
