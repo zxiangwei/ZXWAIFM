@@ -20,7 +20,7 @@ extern "C" {
 #include <thread>
 #include <unistd.h>
 
-constexpr uint64_t kCacheSize = 256 * Region::kSize;
+constexpr uint64_t kCacheSize = 128 * Region::kSize;
 constexpr uint64_t kFarMemSize = 20ULL << 30;
 constexpr uint64_t kNumGCThreads = 15;
 constexpr uint64_t kNumConnections = 600;
