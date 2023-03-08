@@ -3,18 +3,18 @@
 #include <list>
 #include <unordered_map>
 
+#include "cache_impl.hpp"
+
+namespace detail {
+
 template<typename Key, typename Value>
-class LRUCache {
-  static constexpr bool kDisabled = false;
+class LRUCache : public CacheImpl<Key, Value> {
  public:
 
   explicit LRUCache(size_t capacity) : capacity_(capacity) {
   }
 
   bool has(const Key &key) {
-    if constexpr(kDisabled) {
-      return false;
-    }
     return key_to_iter_.count(key);
   }
 
@@ -33,9 +33,6 @@ class LRUCache {
   }
 
   void set(const Key &key, const Value &value) {
-    if constexpr(kDisabled) {
-      return;
-    }
     if (key_to_iter_.count(key)) {
       auto iter = key_to_iter_[key];
       iter->second = value;
@@ -53,4 +50,6 @@ class LRUCache {
   std::list<std::pair<Key, Value>> kv_list_;
   std::unordered_map<Key, typename decltype(kv_list_)::iterator> key_to_iter_;
 };
+
+}
 

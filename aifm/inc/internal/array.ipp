@@ -36,7 +36,8 @@ FORCE_INLINE GenericUniquePtr *GenericArray::at(bool nt, Index_t idx) {
 
 template <typename T, uint64_t... Dims>
 FORCE_INLINE Array<T, Dims...>::Array(FarMemManager *manager)
-    : GenericArray(manager, sizeof(T), kSize) {}
+    : GenericArray(manager, sizeof(T), kSize),
+      lru_cache_(Cache<int, T>::LRU(kLRUCacheSize)) {}
 
 template <typename T, uint64_t... Dims>
 template <auto DimIdx>
