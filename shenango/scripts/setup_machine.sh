@@ -35,4 +35,4 @@ echo 2 > /sys/devices/cpu/rdpmc
 echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
 
 # Enable turbo boost
-echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo
+# echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo
