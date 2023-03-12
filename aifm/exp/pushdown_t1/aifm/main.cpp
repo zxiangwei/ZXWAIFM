@@ -59,9 +59,9 @@ void flush_cache() {
       ACCESS_ONCE(file_block.data[0]);
     }
   }
-  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
-    fm_array_ptrs[k]->enable_prefetch();
-  }
+//  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
+//    fm_array_ptrs[k]->enable_prefetch();
+//  }
 }
 
 void read_files_to_fm_array(const string &in_file_path) {
@@ -69,7 +69,10 @@ void read_files_to_fm_array(const string &in_file_path) {
   if (fd == -1) {
     helpers::dump_core();
   }
-  LOG("open success")
+  LOG("open success");
+  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
+    fm_array_ptrs[k]->disable_prefetch();
+  }
   // Read file and save data into the far-memory array.
   int64_t sum = 0, cur = snappy::FileBlock::kSize, tmp;
   while (sum != kUncompressedFileSize) {
@@ -139,7 +142,7 @@ void bench_farmem_load(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
                   size_t input_length, std::string *compressed) {
 //  snappy::FarMemArraySource<kNumBlocks, TpAPI> reader(input_length, fm_array_ptr);
   fm_array_ptr->disable_prefetch();
-  for (uint64_t i = 0; i < 100; ++i) {
+  for (uint64_t i = 0; i < kNumBlocks; ++i) {
     auto block = fm_array_ptr->read(i);
     DONT_OPTIMIZE(block);
 //    std::this_thread::sleep_for(std::chrono::microseconds(100));
@@ -159,12 +162,12 @@ void fm_compress_files_bench(const string &in_file_path,
 //    fm_array_ptrs[i]->flush();
 //    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-        fm_array_ptrs[i].get());
+//    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get());
 //    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-//    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
-//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
+        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
   }
   auto end = chrono::steady_clock::now();
   cout << "Elapsed time in microseconds : "

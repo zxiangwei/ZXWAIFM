@@ -1,7 +1,6 @@
 #pragma once
 
 #include "helpers.hpp"
-#include "snappy.h"
 
 #include <cstddef>
 #include <stdexcept>
