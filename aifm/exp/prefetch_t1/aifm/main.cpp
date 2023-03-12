@@ -66,6 +66,9 @@ void read_files_to_fm_array(const string &in_file_path) {
   if (fd == -1) {
     helpers::dump_core();
   }
+  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
+    fm_array_ptrs[k]->disable_prefetch();
+  }
   // Read file and save data into the far-memory array.
   int64_t sum = 0, cur = snappy::FileBlock::kSize, tmp;
   while (sum != kUncompressedFileSize) {

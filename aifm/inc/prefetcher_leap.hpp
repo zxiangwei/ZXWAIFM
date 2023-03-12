@@ -69,7 +69,7 @@ class Prefetcher {
   BoyerMooreVote<Pattern_t> bm_vote_;
 
   constexpr static uint32_t kIdxTracesSize = 256;
-  constexpr static uint32_t kHitTimesThresh = 2;
+  constexpr static uint32_t kHitTimesThresh = 8;
   constexpr static uint32_t kGenTasksBurstSize = 8;
   constexpr static uint32_t kMaxSlaveWaitUs = 5;
   constexpr static uint32_t kMaxNumPrefetchSlaveThreads = 16;
