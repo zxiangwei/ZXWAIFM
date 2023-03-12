@@ -10,6 +10,8 @@ extern "C" {
 #include "helpers.hpp"
 #include "manager.hpp"
 
+#include "trend_reader.hpp"
+
 #include <algorithm>
 #include <chrono>
 #include <fcntl.h>
@@ -29,6 +31,8 @@ constexpr uint64_t kUncompressedFileNumBlocks =
     ((kUncompressedFileSize - 1) / snappy::FileBlock::kSize) + 1;
 constexpr uint32_t kNumUncompressedFiles = 16;
 constexpr bool kUseTpAPI = false;
+constexpr size_t kLoopTimes = 1000;
+constexpr size_t kMaxTrendStep = 30;
 
 using namespace std;
 
@@ -125,20 +129,28 @@ void fm_compress_files_bench(const string &in_file_path,
                              const string &out_file_path) {
   string out_str;
   read_files_to_fm_array(in_file_path);
-  auto start = chrono::steady_clock::now();
-  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-    std::cout << "Compressing file " << i << std::endl;
+  size_t loop_times = std::min(kLoopTimes, kUncompressedFileNumBlocks / kMaxTrendStep);
+  trendtest::Reader reader("trend.txt");
+  std::optional<trendtest::Trend> opt_trend;
+  while ((opt_trend = reader.Read()).has_value()) {
+    auto start = chrono::steady_clock::now();
+    for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
+//      std::cout << "Compressing file " << i << std::endl;
 //    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
-        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-//    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
+//    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+      opt_trend->LoopWithTimes([i](size_t index) {
+        auto block = fm_array_ptrs[i]->read(index);
+        DONT_OPTIMIZE(block);
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+      }, loop_times);
+    }
+    auto end = chrono::steady_clock::now();
+    cout << "Elapsed time in microseconds : "
+         << chrono::duration_cast<chrono::microseconds>(end - start).count()
+         << " µs" << endl;
   }
-  auto end = chrono::steady_clock::now();
-  cout << "Elapsed time in microseconds : "
-       << chrono::duration_cast<chrono::microseconds>(end - start).count()
-       << " µs" << endl;
 
   // write_file_to_string(out_file_path, out_str);
 }
