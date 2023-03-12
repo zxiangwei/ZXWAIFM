@@ -40,7 +40,7 @@ protected:
                                         Index_t idx) -> GenericUniquePtr * {
     return mapping_fn(state, idx);
   };
-  lr::Prefetcher<decltype(kInduceFn), decltype(kInferFn), decltype(kMappingFn)>
+  Prefetcher<decltype(kInduceFn), decltype(kInferFn), decltype(kMappingFn)>
       prefetcher_;
 
   GenericArray(FarMemManager *manager, uint32_t item_size, uint64_t num_items);
