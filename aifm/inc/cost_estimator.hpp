@@ -19,7 +19,7 @@ namespace far_memory {
 // 注意要使用指针形式以使用多态
 class CostEstimator {
  public:
-  static constexpr double kDefaultPMRatio = 0.9;
+  static constexpr double kDefaultPMRatio = 0.95;
   static constexpr double kDefaultPushdownRatio = 0.95;
   static constexpr uint64_t kDefaultInternetSpeed = 950000000;
   static constexpr uint64_t kSToUs = 1000000;
