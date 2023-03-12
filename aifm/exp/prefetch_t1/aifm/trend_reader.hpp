@@ -2,6 +2,7 @@
 #define PATTERNGENERATOR__TREND_READER_HPP_
 
 #include <optional>
+#include <fstream>
 #include <sstream>
 
 #include "trend.hpp"
