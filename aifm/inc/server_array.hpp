@@ -2,6 +2,7 @@
 #define RPC_ARRAY_HPP_
 
 #include <vector>
+#include <thread>
 
 #include "rpc_router.hpp"
 #include "reader_writer_lock.hpp"
@@ -39,6 +40,18 @@ class ServerArray : public ServerDS {
     router_.Register("Add", Add);
     router_.Register("Read", [this](size_t index) { return Read(index); });
     router_.Register("SnappyCompress", [this]() { SnappyCompress(); });
+    RegisterDecisionTestFuncs();
+  }
+
+  void RegisterDecisionTestFuncs() {
+    constexpr int kBaseTime = 6500;
+    constexpr int kTimeStep = 500;
+    constexpr int kFuncNum = 16;
+    for (int i = 0; i < kFuncNum; ++i) {
+      router_.Register("Func" + std::to_string(i), [i]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(kBaseTime + kTimeStep * i));
+      });
+    }
   }
 
   static int Add(int a, int b) { return a + b; }

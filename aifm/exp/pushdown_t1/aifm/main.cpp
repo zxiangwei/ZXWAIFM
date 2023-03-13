@@ -137,6 +137,39 @@ void call_compress(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr) {
   LOG_ASSERT(success, "Call SnappyCompress Failed");
 }
 
+std::string func_name(int i) {
+  return "Func" + std::to_string(i);
+}
+
+void register_decision_funcs() {
+  constexpr int kBaseTime = 6500;
+  constexpr int kTimeStep = 500;
+  constexpr int kFuncNum = 16;
+  static_assert(kFuncNum == kNumUncompressedFiles);
+  for (int i = 0; i < kFuncNum; ++i) {
+    fm_array_ptrs[i]->register_local(func_name(i), [i]() {
+      for (size_t j = 0; j < kUncompressedFileNumBlocks; ++j) {
+        auto block = fm_array_ptrs[i]->read(j);
+        DONT_OPTIMIZE(block);
+      }
+      int sleep_time = static_cast<int>((kBaseTime + kTimeStep * i) * CostEstimator::kDefaultPMRatio);
+      std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+    });
+  }
+}
+
+void call_decision_funcs() {
+  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
+    auto start = chrono::steady_clock::now();
+    rpc::BufferPtr args, ret;
+    args = rpc::SerializeArgsToBuffer();
+    bool success = fm_array_ptrs[i]->call(func_name(i), args, ret);
+    LOG_ASSERT(success, "Call %d Failed", i);
+    auto end = chrono::steady_clock::now();
+    LOG("Call %d cost %ld us", i, chrono::duration_cast<chrono::microseconds>(end - start).count());
+  }
+}
+
 template<uint64_t kNumBlocks, bool TpAPI>
 void bench_farmem_load(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
                   size_t input_length, std::string *compressed) {
@@ -155,20 +188,22 @@ void fm_compress_files_bench(const string &in_file_path,
   LOG("Start");
   read_files_to_fm_array(in_file_path);
   LOG("Read over");
+  call_decision_funcs();
   auto start = chrono::steady_clock::now();
-  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-    std::cout << "Compressing file " << i << std::endl;
+  call_decision_funcs();
+//  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
+//    std::cout << "Compressing file " << i << std::endl;
 //    fm_array_ptrs[i]->snappy_compress();
 //    fm_array_ptrs[i]->flush();
 //    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-        fm_array_ptrs[i].get());
+//    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get());
 //    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-  }
+//  }
   auto end = chrono::steady_clock::now();
   cout << "Elapsed time in microseconds : "
        << chrono::duration_cast<chrono::microseconds>(end - start).count()
