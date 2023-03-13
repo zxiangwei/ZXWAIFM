@@ -188,7 +188,7 @@ void fm_compress_files_bench(const string &in_file_path,
   LOG("Start");
   read_files_to_fm_array(in_file_path);
   register_decision_funcs();
-  call_decision_funcs();
+//  call_decision_funcs();
   auto start = chrono::steady_clock::now();
   call_decision_funcs();
 //  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
