@@ -20,7 +20,7 @@ namespace far_memory {
 class CostEstimator {
  public:
   static constexpr double kDefaultPMRatio = 0.9;
-  static constexpr double kDefaultPushdownRatio = 0.95;
+  static constexpr double kDefaultPushdownRatio = 0.98;
   static constexpr uint64_t kDefaultInternetSpeed = 950000000;
   static constexpr uint64_t kSToUs = 1000000;
 

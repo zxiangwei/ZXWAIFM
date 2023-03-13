@@ -142,7 +142,7 @@ std::string func_name(int i) {
 }
 
 void register_decision_funcs() {
-  constexpr int kBaseTime = 13000;
+  constexpr int kBaseTime = 2500;
   constexpr int kTimeStep = 1000;
   constexpr int kFuncNum = 16;
   static_assert(kFuncNum == kNumUncompressedFiles);
