@@ -187,7 +187,7 @@ void fm_compress_files_bench(const string &in_file_path,
   string out_str;
   LOG("Start");
   read_files_to_fm_array(in_file_path);
-  LOG("Read over");
+  register_decision_funcs();
   call_decision_funcs();
   auto start = chrono::steady_clock::now();
   call_decision_funcs();
