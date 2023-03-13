@@ -67,7 +67,6 @@ bool GenericArray::call(const std::string &method, const rpc::BufferPtr &args, r
     }
   }
   if (estimator->SuggestPushdown(flush_bytes, load_bytes)) {
-    printf("pushdown\n");
     estimator->StartBench();
     flush();
     estimator->FlushOver(flush_bytes);
@@ -75,7 +74,6 @@ bool GenericArray::call(const std::string &method, const rpc::BufferPtr &args, r
     success = FarMemManagerFactory::get()->call(ds_id_, method, args, ret);
     estimator->ComputeInMemoryOver(ret->ReadableBytes());
   } else {
-    printf("no pushdown\n");
     estimator->StartBench();
     auto reply = rpc_router_.Call(method, args);
     success = (reply.error_code == rpc::RpcErrorCode::kSuccess);

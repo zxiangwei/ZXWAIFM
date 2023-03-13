@@ -8,7 +8,7 @@
 
 namespace far_memory {
 
-#define COST_LOG_ON 0
+#define COST_LOG_ON 1
 
 #if COST_LOG_ON
 #define COST_LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__);
@@ -41,7 +41,7 @@ class CostEstimator {
   virtual void FlushOver(uint64_t flush_bytes) {
     uint64_t us = EndBench();
     uint64_t speed = (flush_bytes == 0) ? kDefaultInternetSpeed : ((flush_bytes * kSToUs) / us);
-    COST_LOG("flush %ld bytes with %ld us, speed: %ld", flush_bytes, us, speed);
+//    COST_LOG("flush %ld bytes with %ld us, speed: %ld", flush_bytes, us, speed);
     if (internet_speed_ == 0) { // 第一次
       internet_speed_ = speed;
     } else {
@@ -53,8 +53,8 @@ class CostEstimator {
     uint64_t rtime = (ret_bytes * kSToUs) / internet_speed_;
     uint64_t mtime = us - rtime;
     uint64_t ptime = static_cast<uint64_t>(static_cast<double>(mtime) * pm_ratio_);
-    COST_LOG("compute in memory return %ld bytes with %ld us, rtime: %ld, mtime: %ld, ptime: %ld",
-             ret_bytes, us, rtime, mtime, ptime);
+//    COST_LOG("compute in memory return %ld bytes with %ld us, rtime: %ld, mtime: %ld, ptime: %ld",
+//             ret_bytes, us, rtime, mtime, ptime);
     if (compute_in_memory_time_ == 0) { // 第一次
       ret_time_ = rtime;
       compute_in_memory_time_ = mtime;
@@ -68,12 +68,12 @@ class CostEstimator {
   virtual void ComputeInProcessorOver(uint64_t load_bytes) {
     uint64_t us = EndBench();
     uint64_t ptime = us - ((load_bytes * kSToUs) / internet_speed_);
-    COST_LOG("compute in processor load %ld bytes with %ld us, ptime: %ld",
-             load_bytes, us, ptime);
+//    COST_LOG("compute in processor load %ld bytes with %ld us, ptime: %ld",
+//             load_bytes, us, ptime);
     compute_in_processor_time_ = (compute_in_processor_time_ + ptime) >> 1;
     pm_ratio_ = static_cast<double>(compute_in_processor_time_) /
         static_cast<double>(compute_in_memory_time_);
-    COST_LOG("pm_ratio change to %f", pm_ratio_);
+//    COST_LOG("pm_ratio change to %f", pm_ratio_);
   }
 
   virtual bool SuggestPushdown(uint64_t flush_bytes, uint64_t load_bytes) {
