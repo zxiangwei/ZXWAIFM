@@ -29,7 +29,7 @@ constexpr uint64_t kUncompressedFileNumBlocks =
     ((kUncompressedFileSize - 1) / snappy::FileBlock::kSize) + 1;
 constexpr uint32_t kNumUncompressedFiles = 16;
 constexpr bool kUseTpAPI = false;
-constexpr uint64_t kReadFileBlockNum = 4096;
+constexpr uint64_t kReadFileBlockNum = 512;
 
 using namespace std;
 
