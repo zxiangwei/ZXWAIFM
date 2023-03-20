@@ -8,7 +8,7 @@
 
 template<typename Key, typename Value>
 class Cache {
-  static constexpr bool kDisabled = false;
+  static constexpr bool kDisabled = true;
   using Impl = detail::CacheImpl<Key, Value>;
  public:
   static Cache LRU(size_t capacity) {
