@@ -56,30 +56,30 @@ void GenericArray::flush() {
 
 bool GenericArray::call(const std::string &method, const rpc::BufferPtr &args, rpc::BufferPtr &ret) {
   bool success = false;
-//  auto estimator = cost_estimator_map_.Get(method);
-//  uint64_t flush_bytes = 0, load_bytes = 0;
-//  // 统计 flush_bytes 和 load_bytes
-//  for (uint64_t i = 0; i < kNumItems_; ++i) {
-//    if (!ptrs_[i].is_present()) {
-//      load_bytes += kItemSize_;
-//    } else if (ptrs_[i].is_dirty()){
-//      flush_bytes += kItemSize_;
-//    }
-//  }
-//  if (estimator->SuggestPushdown(flush_bytes, load_bytes)) {
-//    estimator->StartBench();
-//    flush();
-//    estimator->FlushOver(flush_bytes);
-//    estimator->StartBench();
-//    success = FarMemManagerFactory::get()->call(ds_id_, method, args, ret);
-//    estimator->ComputeInMemoryOver(ret->ReadableBytes());
-//  } else {
-//    estimator->StartBench();
+  auto estimator = cost_estimator_map_.Get(method);
+  uint64_t flush_bytes = 0, load_bytes = 0;
+  // 统计 flush_bytes 和 load_bytes
+  for (uint64_t i = 0; i < kNumItems_; ++i) {
+    if (!ptrs_[i].is_present()) {
+      load_bytes += kItemSize_;
+    } else if (ptrs_[i].is_dirty()){
+      flush_bytes += kItemSize_;
+    }
+  }
+  if (estimator->SuggestPushdown(flush_bytes, load_bytes)) {
+    estimator->StartBench();
+    flush();
+    estimator->FlushOver(flush_bytes);
+    estimator->StartBench();
+    success = FarMemManagerFactory::get()->call(ds_id_, method, args, ret);
+    estimator->ComputeInMemoryOver(ret->ReadableBytes());
+  } else {
+    estimator->StartBench();
     auto reply = rpc_router_.Call(method, args);
     success = (reply.error_code == rpc::RpcErrorCode::kSuccess);
     ret = reply.ret;
-//    estimator->ComputeInProcessorOver(load_bytes);
-//  }
+    estimator->ComputeInProcessorOver(load_bytes);
+  }
   return success;
 }
 
