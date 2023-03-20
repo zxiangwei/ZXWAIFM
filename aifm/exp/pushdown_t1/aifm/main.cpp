@@ -216,8 +216,8 @@ void fm_compress_files_bench(const string &in_file_path,
 //    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
-    do_s2<kUncompressedFileNumBlocks, kUseTpAPI>(
-        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+//    do_s2<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
   }
   auto end = chrono::steady_clock::now();
   cout << "Elapsed time in microseconds : "
