@@ -59,9 +59,9 @@ void flush_cache() {
       ACCESS_ONCE(file_block.data[0]);
     }
   }
-//  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
-//    fm_array_ptrs[k]->enable_prefetch();
-//  }
+  for (uint32_t k = 0; k < kNumUncompressedFiles; k++) {
+    fm_array_ptrs[k]->enable_prefetch();
+  }
 }
 
 void read_files_to_fm_array(const string &in_file_path) {
@@ -209,10 +209,10 @@ void fm_compress_files_bench(const string &in_file_path,
     std::cout << "Compressing file " << i << std::endl;
 //    fm_array_ptrs[i]->snappy_compress();
 //    fm_array_ptrs[i]->flush();
-//    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-        fm_array_ptrs[i].get());
+    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+//    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get());
 //    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
