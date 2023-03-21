@@ -284,6 +284,7 @@ int argc;
 void my_main(void *arg) {
   char **argv = (char **)arg;
   std::string ip_addr_port(argv[1]);
+  std::cout << "connecting to " << ip_addr_port << std::endl;
   do_work(helpers::str_to_netaddr(ip_addr_port));
 }
 
