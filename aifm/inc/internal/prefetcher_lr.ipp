@@ -62,40 +62,38 @@ Prefetcher<InduceFn, InferFn, MappingFn>::generate_prefetch_tasks() {
       return;
     }
     num_objs_to_prefetch--;
-    for (uint32_t j = 0; j < kPrefetchNum; ++j) {
-      Pattern_t pat = trend_predictor_.GetTrend(predict_pos_++);
-      next_prefetch_idx_ = inferer(next_prefetch_idx_, pat);
+    Pattern_t pat = trend_predictor_.GetTrend(predict_pos_++);
+    next_prefetch_idx_ = inferer(next_prefetch_idx_, pat);
 #ifdef PREFECHER_LR_LOG
-      printf("prefetch(%ld)\n", next_prefetch_idx_);
+    printf("prefetch(%ld)\n", next_prefetch_idx_);
 #endif
-      GenericUniquePtr *task = mapper(state_, next_prefetch_idx_);
-      if (!task) {
+    GenericUniquePtr *task = mapper(state_, next_prefetch_idx_);
+    if (!task) {
+      continue;
+    }
+    bool dispatched = false;
+    std::optional<uint32_t> inactive_slave_id = std::nullopt;
+    for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
+      auto &status = slave_status_[i].data;
+      if (status.cv.HasWaiters()) {
+        inactive_slave_id = i;
         continue;
       }
-      bool dispatched = false;
-      std::optional<uint32_t> inactive_slave_id = std::nullopt;
-      for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
-        auto &status = slave_status_[i].data;
-        if (status.cv.HasWaiters()) {
-          inactive_slave_id = i;
-          continue;
-        }
-        if (ACCESS_ONCE(status.task) == nullptr) {
-          ACCESS_ONCE(status.task) = task;
-          dispatched = true;
-          break;
-        }
+      if (ACCESS_ONCE(status.task) == nullptr) {
+        ACCESS_ONCE(status.task) = task;
+        dispatched = true;
+        break;
       }
-      if (!dispatched) {
-        if (likely(inactive_slave_id)) {
-          auto &status = slave_status_[*inactive_slave_id].data;
-          status.task = task;
-          wmb();
-          status.cv.Signal();
-        } else {
-          DerefScope scope;
-          task->swap_in(nt_);
-        }
+    }
+    if (!dispatched) {
+      if (likely(inactive_slave_id)) {
+        auto &status = slave_status_[*inactive_slave_id].data;
+        status.task = task;
+        wmb();
+        status.cv.Signal();
+      } else {
+        DerefScope scope;
+        task->swap_in(nt_);
       }
     }
   }
@@ -135,7 +133,7 @@ FORCE_INLINE void
 Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
   uint64_t local_counter = 0;
   InduceFn inducer;
-  InferFn inferer;
+//  InferFn inferer;
 
   while (likely(!ACCESS_ONCE(exit_))) {
     auto [counter, idx, nt] = traces_[traces_head_];
@@ -154,17 +152,16 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
         printf("predict failed(%ld)\n", new_pattern);
 #endif
         hit_times_ = num_objs_to_prefetch = 0;
-      } else if (++hit_times_ >= kHitTimesThresh) {
+      } else {
 #ifdef PREFECHER_LR_LOG
         printf("predict success(%ld)\n", new_pattern);
 #endif
-        if (unlikely(hit_times_ == kHitTimesThresh)) {
+        if (trend_predictor_.TrendChanged()) {
           predict_pos_ = 0;
           next_prefetch_idx_ = idx;
           num_objs_to_prefetch = kPrefetchWinSize_;
         } else {
           predict_pos_ = 0;
-          next_prefetch_idx_ = idx;
           num_objs_to_prefetch++;
         }
       }

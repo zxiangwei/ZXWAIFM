@@ -15,14 +15,17 @@ class TrendPredictor {
       trend_begin_index_ = next_history_index_;
       trend_len_ = 1;
       pos_in_trend_ = 0;
+      trend_changed_ = true;
       success_ = true;
     } else {  // trend_len_ > 0
       uint64_t test_index = AddIndex(trend_begin_index_, pos_in_trend_);
       if (history == histories_[test_index]) {  // 符合 Trend
         // 按照 Trend 进行预测
         UpdatePosInTrend();
+        trend_changed_ = false;
         success_ = true;
       } else {  // 不符合 Trend
+        trend_changed_ = true;
         // 首先尝试往前扩大 Trend
         assert(filled_elem_num_ >= trend_len_);
         uint64_t extend_num = filled_elem_num_ - trend_len_ - 1;
@@ -80,6 +83,10 @@ class TrendPredictor {
     return success_;
   }
 
+  bool TrendChanged() const {
+    return trend_changed_;
+  }
+
   std::optional<T> Predict(T history) {
     AddHistory(history);
     if (MatchTrend()) {
@@ -112,4 +119,5 @@ class TrendPredictor {
   uint64_t next_history_index_{0};
   uint64_t filled_elem_num_{0};
   bool success_{false};
+  bool trend_changed_{false};
 };
