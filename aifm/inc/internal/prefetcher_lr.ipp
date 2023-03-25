@@ -4,7 +4,7 @@
 
 #include <optional>
 
-#define PREFECHER_LR_LOG 1
+//#define PREFECHER_LR_LOG 1
 
 #ifdef PREFECHER_LR_LOG
 #include <iostream>
@@ -164,7 +164,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
 #ifdef PREFECHER_LR_LOG
           printf("trend not changed(%ld)\n", new_pattern);
 #endif
-          predict_pos_ = 0;
+//          predict_pos_ = 0;
           num_objs_to_prefetch++;
         }
       }
