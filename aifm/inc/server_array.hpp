@@ -44,8 +44,8 @@ class ServerArray : public ServerDS {
   }
 
   void RegisterDecisionTestFuncs() {
-    constexpr int kBaseTime = 2500;
-    constexpr int kTimeStep = 1000;
+    constexpr int kBaseTime = 1050;
+    constexpr int kTimeStep = 1050;
     constexpr int kFuncNum = 16;
     for (int i = 0; i < kFuncNum; ++i) {
       router_.Register("Func" + std::to_string(i), [i]() {
