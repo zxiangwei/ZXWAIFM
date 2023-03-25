@@ -153,14 +153,17 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
 #endif
         hit_times_ = num_objs_to_prefetch = 0;
       } else {
-#ifdef PREFECHER_LR_LOG
-        printf("predict success(%ld)\n", new_pattern);
-#endif
         if (trend_predictor_.TrendChanged()) {
+#ifdef PREFECHER_LR_LOG
+          printf("trend changed(%ld)\n", new_pattern);
+#endif
           predict_pos_ = 0;
           next_prefetch_idx_ = idx;
           num_objs_to_prefetch = kPrefetchWinSize_;
         } else {
+#ifdef PREFECHER_LR_LOG
+          printf("trend not changed(%ld)\n", new_pattern);
+#endif
           predict_pos_ = 0;
           num_objs_to_prefetch++;
         }
