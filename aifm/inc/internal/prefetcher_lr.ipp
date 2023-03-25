@@ -4,7 +4,7 @@
 
 #include <optional>
 
-//#define PREFECHER_LR_LOG 1
+#define PREFECHER_LR_LOG 1
 
 #ifdef PREFECHER_LR_LOG
 #include <iostream>
@@ -188,7 +188,7 @@ Prefetcher<InduceFn, InferFn, MappingFn>::add_trace(bool nt, Index_t idx) {
   // The goal is to make it extremely short and fast, therefore not compromising
   // the mutator performance when prefetching is enabled. The most overheads are
   // transferred to the backend prefetching threads.
-#ifdef PREFECHER_LOG
+#ifdef PREFECHER_LR_LOG
   printf("add_trace(%ld)\n", idx);
 #endif
   traces_[traces_tail_++] = {
