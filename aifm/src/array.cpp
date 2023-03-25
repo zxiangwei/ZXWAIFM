@@ -66,20 +66,20 @@ bool GenericArray::call(const std::string &method, const rpc::BufferPtr &args, r
       flush_bytes += kItemSize_;
     }
   }
-  if (estimator->SuggestPushdown(flush_bytes, load_bytes)) {
-    estimator->StartBench();
-    flush();
-    estimator->FlushOver(flush_bytes);
-    estimator->StartBench();
-    success = FarMemManagerFactory::get()->call(ds_id_, method, args, ret);
-    estimator->ComputeInMemoryOver(ret->ReadableBytes());
-  } else {
-    estimator->StartBench();
+//  if (estimator->SuggestPushdown(flush_bytes, load_bytes)) {
+//    estimator->StartBench();
+//    flush();
+//    estimator->FlushOver(flush_bytes);
+//    estimator->StartBench();
+//    success = FarMemManagerFactory::get()->call(ds_id_, method, args, ret);
+//    estimator->ComputeInMemoryOver(ret->ReadableBytes());
+//  } else {
+//    estimator->StartBench();
     auto reply = rpc_router_.Call(method, args);
     success = (reply.error_code == rpc::RpcErrorCode::kSuccess);
     ret = reply.ret;
-    estimator->ComputeInProcessorOver(load_bytes);
-  }
+//    estimator->ComputeInProcessorOver(load_bytes);
+//  }
   return success;
 }
 
