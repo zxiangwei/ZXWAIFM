@@ -8,7 +8,7 @@
 
 namespace far_memory {
 
-#define COST_LOG_ON 1
+//#define COST_LOG_ON 1
 
 #if COST_LOG_ON
 #define COST_LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__);
