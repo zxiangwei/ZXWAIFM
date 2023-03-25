@@ -19,6 +19,10 @@ FORCE_INLINE Prefetcher<InduceFn, InferFn, MappingFn>::Prefetcher(
     FarMemDevice *device, uint8_t *state, uint32_t object_data_size)
     : kPrefetchWinSize_(device->get_prefetch_win_size() / (object_data_size)),
       state_(state), object_data_size_(object_data_size) {
+  for (auto &trace : traces_) {
+    trace.counter = 0;
+  }
+  prefetch_threads_.emplace_back([&]() { prefetch_master_fn(); });
   for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
     auto &status = slave_status_[i].data;
     status.task = nullptr;
@@ -32,6 +36,10 @@ template <typename InduceFn, typename InferFn, typename MappingFn>
 FORCE_INLINE Prefetcher<InduceFn, InferFn, MappingFn>::~Prefetcher() {
   exit_ = true;
   wmb();
+  while (!ACCESS_ONCE(master_exited)) {
+    cv_prefetch_master_.Signal();
+    thread_yield();
+  }
   for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
     auto &status = slave_status_[i].data;
     while (!ACCESS_ONCE(status.is_exited)) {
@@ -44,34 +52,51 @@ FORCE_INLINE Prefetcher<InduceFn, InferFn, MappingFn>::~Prefetcher() {
   }
 }
 
-
 template <typename InduceFn, typename InferFn, typename MappingFn>
 FORCE_INLINE void
-Prefetcher<InduceFn, InferFn, MappingFn>::dispatch_prefetch_task(GenericUniquePtr *task) {
-  if (!task) return;
-  bool dispatched = false;
-  std::optional<uint32_t> inactive_slave_id = std::nullopt;
-  for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
-    auto &status = slave_status_[i].data;
-    if (status.cv.HasWaiters()) {
-      inactive_slave_id = i;
-      continue;
+Prefetcher<InduceFn, InferFn, MappingFn>::generate_prefetch_tasks() {
+  InferFn inferer;
+  MappingFn mapper;
+  for (uint32_t i = 0; i < kGenTasksBurstSize; i++) {
+    if (!num_objs_to_prefetch) {
+      return;
     }
-    if (ACCESS_ONCE(status.task) == nullptr) {
-      ACCESS_ONCE(status.task) = task;
-      dispatched = true;
-      break;
-    }
-  }
-  if (!dispatched) {
-    if (likely(inactive_slave_id)) {
-      auto &status = slave_status_[*inactive_slave_id].data;
-      status.task = task;
-      wmb();
-      status.cv.Signal();
-    } else {
-      DerefScope scope;
-      task->swap_in(nt_);
+    num_objs_to_prefetch--;
+    for (uint32_t j = 0; j < kPrefetchNum; ++j) {
+      Pattern_t pat = trend_predictor_.GetTrend(predict_pos_++);
+      next_prefetch_idx_ = inferer(next_prefetch_idx_, pat);
+#ifdef PREFECHER_LR_LOG
+      printf("prefetch(%ld)\n", next_prefetch_idx_);
+#endif
+      GenericUniquePtr *task = mapper(state_, next_prefetch_idx_);
+      if (!task) {
+        continue;
+      }
+      bool dispatched = false;
+      std::optional<uint32_t> inactive_slave_id = std::nullopt;
+      for (uint32_t i = 0; i < kMaxNumPrefetchSlaveThreads; i++) {
+        auto &status = slave_status_[i].data;
+        if (status.cv.HasWaiters()) {
+          inactive_slave_id = i;
+          continue;
+        }
+        if (ACCESS_ONCE(status.task) == nullptr) {
+          ACCESS_ONCE(status.task) = task;
+          dispatched = true;
+          break;
+        }
+      }
+      if (!dispatched) {
+        if (likely(inactive_slave_id)) {
+          auto &status = slave_status_[*inactive_slave_id].data;
+          status.task = task;
+          wmb();
+          status.cv.Signal();
+        } else {
+          DerefScope scope;
+          task->swap_in(nt_);
+        }
+      }
     }
   }
 }
@@ -107,28 +132,73 @@ Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_slave_fn(uint32_t tid) {
 
 template <typename InduceFn, typename InferFn, typename MappingFn>
 FORCE_INLINE void
-Prefetcher<InduceFn, InferFn, MappingFn>::add_trace(bool nt, Index_t idx) {
+Prefetcher<InduceFn, InferFn, MappingFn>::prefetch_master_fn() {
+  uint64_t local_counter = 0;
   InduceFn inducer;
   InferFn inferer;
-  MappingFn mapper;
 
-  auto new_pattern = inducer(last_idx_, idx);
-  trend_predictor_.AddHistory(new_pattern);
-  last_idx_ = idx;
-  if (trend_predictor_.MatchTrend()) {
-    hit_times_++;
-    Index_t prefetch_idx = idx;
-    for (uint32_t i = 0; i < kPrefetchNum; ++i) {
-      auto pat = trend_predictor_.GetTrend(i);
-      prefetch_idx = inferer(prefetch_idx, pat);
+  while (likely(!ACCESS_ONCE(exit_))) {
+    auto [counter, idx, nt] = traces_[traces_head_];
+
+    if (likely(local_counter < counter)) {
+      local_counter = counter;
+      traces_head_ = (traces_head_ + 1) % kIdxTracesSize;
+
+      if (unlikely(idx == last_idx_)) {
+        continue;
+      }
+      auto new_pattern = inducer(last_idx_, idx);
+      trend_predictor_.AddHistory(new_pattern);
+      if (!trend_predictor_.MatchTrend()) {
 #ifdef PREFECHER_LR_LOG
-      printf("visit(%d), prefetch(%d-%d)\n", idx, i, prefetch_idx);
+        printf("predict failed(%ld)\n", new_pattern);
 #endif
-      GenericUniquePtr *task = mapper(state_, prefetch_idx);
-      dispatch_prefetch_task(task);
+        hit_times_ = num_objs_to_prefetch = 0;
+      } else if (++hit_times_ >= kHitTimesThresh) {
+#ifdef PREFECHER_LR_LOG
+        printf("predict success(%ld)\n", new_pattern);
+#endif
+        if (unlikely(hit_times_ == kHitTimesThresh)) {
+          predict_pos_ = 0;
+          next_prefetch_idx_ = idx;
+          num_objs_to_prefetch = kPrefetchWinSize_;
+        } else {
+          predict_pos_ = 0;
+          next_prefetch_idx_ = idx;
+          num_objs_to_prefetch++;
+        }
+      }
+//      pattern_ = new_pattern;
+      last_idx_ = idx;
+      if (unlikely(nt_ != nt)) {
+        // nt_ is shared by all slaves. Use the store instruction only when
+        // neccesary to reduce cache traffic.
+        nt_ = nt;
+      }
+    } else if (!num_objs_to_prefetch) {
+      cv_prefetch_master_.Wait();
+      continue;
     }
-  } else {
-    hit_times_ = 0;
+    generate_prefetch_tasks();
+  }
+  ACCESS_ONCE(master_exited) = true;
+}
+
+template <typename InduceFn, typename InferFn, typename MappingFn>
+FORCE_INLINE void
+Prefetcher<InduceFn, InferFn, MappingFn>::add_trace(bool nt, Index_t idx) {
+  // add_trace() is at the call path of the frontend mutator thread.
+  // The goal is to make it extremely short and fast, therefore not compromising
+  // the mutator performance when prefetching is enabled. The most overheads are
+  // transferred to the backend prefetching threads.
+#ifdef PREFECHER_LOG
+  printf("add_trace(%ld)\n", idx);
+#endif
+  traces_[traces_tail_++] = {
+      .counter = ++traces_counter_, .idx = idx, .nt = nt};
+  traces_tail_ %= kIdxTracesSize;
+  if (unlikely(cv_prefetch_master_.HasWaiters())) {
+    cv_prefetch_master_.Signal();
   }
 }
 

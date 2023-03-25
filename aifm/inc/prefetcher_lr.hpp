@@ -1,6 +1,5 @@
 #pragma once
 
-#include "boyer_moore_vote.hpp"
 #include "trend_predictor_lr.hpp"
 
 #include "sync.h"
@@ -18,7 +17,7 @@ class FarMemDevice;
 
 namespace lr {
 
-template<typename InduceFn, typename InferFn, typename MappingFn>
+template <typename InduceFn, typename InferFn, typename MappingFn>
 class Prefetcher {
  private:
   using InduceFnTraits = helpers::FunctionTraits<InduceFn>;
@@ -55,15 +54,24 @@ class Prefetcher {
   static_assert(std::is_same<GenericUniquePtr *,
                              typename MappingFnTraits::ResultType>::value);
 
+  struct Trace {
+    uint64_t counter;
+    uint64_t idx;
+    bool nt;
+  };
+
   struct SlaveStatus {
     GenericUniquePtr *task;
     bool is_exited;
     rt::CondVar cv;
   };
 
-  TrendPredictor<Pattern_t, 4096> trend_predictor_;
+  TrendPredictor<Pattern_t, 32> trend_predictor_;
+  uint64_t predict_pos_ = 0;
 
-  constexpr static uint32_t kHitTimesThresh = 2;
+  constexpr static uint32_t kIdxTracesSize = 256;
+  constexpr static uint32_t kHitTimesThresh = 1;
+  constexpr static uint32_t kGenTasksBurstSize = 8;
   constexpr static uint32_t kMaxSlaveWaitUs = 5;
   constexpr static uint32_t kMaxNumPrefetchSlaveThreads = 16;
   constexpr static uint32_t kPrefetchNum = 1;
@@ -77,12 +85,19 @@ class Prefetcher {
   uint32_t num_objs_to_prefetch = 0;
   Index_t next_prefetch_idx_;
   bool nt_ = false;
+  Trace traces_[kIdxTracesSize];
+  uint32_t traces_head_ = 0;
+  uint32_t traces_tail_ = 0;
+  uint64_t traces_counter_ = 0;
   std::vector<rt::Thread> prefetch_threads_;
   CachelineAligned(SlaveStatus) slave_status_[kMaxNumPrefetchSlaveThreads];
+  rt::CondVar cv_prefetch_master_;
+  bool master_exited = false;
   bool exit_ = false;
 
+  void generate_prefetch_tasks();
+  void prefetch_master_fn();
   void prefetch_slave_fn(uint32_t tid);
-  void dispatch_prefetch_task(GenericUniquePtr *task);
 
  public:
   Prefetcher(FarMemDevice *device, uint8_t *state, uint32_t object_data_size);
