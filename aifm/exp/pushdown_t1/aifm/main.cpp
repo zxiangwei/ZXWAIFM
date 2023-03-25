@@ -201,16 +201,16 @@ void fm_compress_files_bench(const string &in_file_path,
   string out_str;
   LOG("Start");
   read_files_to_fm_array(in_file_path);
-//  register_decision_funcs();
-//  call_decision_funcs();
+  register_decision_funcs();
+  call_decision_funcs();
   auto start = chrono::steady_clock::now();
-//  call_decision_funcs();
-  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
-    std::cout << "Compressing file " << i << std::endl;
+  call_decision_funcs();
+//  for (uint32_t i = 0; i < kNumUncompressedFiles; i++) {
+//    std::cout << "Compressing file " << i << std::endl;
 //    fm_array_ptrs[i]->snappy_compress();
 //    fm_array_ptrs[i]->flush();
-    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
-        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
+//    snappy::Compress<kUncompressedFileNumBlocks, kUseTpAPI>(
+//        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
 //    call_compress<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get());
 //    do_something<kUncompressedFileNumBlocks, kUseTpAPI>(
@@ -218,7 +218,7 @@ void fm_compress_files_bench(const string &in_file_path,
 //    bench_farmem_load<kUncompressedFileNumBlocks, kUseTpAPI>(
 //    do_s2<kUncompressedFileNumBlocks, kUseTpAPI>(
 //        fm_array_ptrs[i].get(), kUncompressedFileSize, &out_str);
-  }
+//  }
   auto end = chrono::steady_clock::now();
   cout << "Elapsed time in microseconds : "
        << chrono::duration_cast<chrono::microseconds>(end - start).count()
