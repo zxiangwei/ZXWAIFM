@@ -105,9 +105,9 @@ void do_something(Array<snappy::FileBlock, kNumBlocks> *fm_array_ptr,
                   size_t input_length, std::string *compressed) {
 //  snappy::FarMemArraySource<kNumBlocks, TpAPI> reader(input_length, fm_array_ptr);
   for (uint64_t i = 0; i < kNumBlocks; ++i) {
-    if (i % 4 == 3) continue; // 1 1 2
-//    uint64_t m = i % 6;
-//    if (m == 2 || m == 4 || m == 5) continue; // 1 2 3
+//    if (i % 4 == 3) continue; // 1 1 2
+    uint64_t m = i % 6;
+    if (m == 2 || m == 4 || m == 5) continue; // 1 2 3
     auto block = fm_array_ptr->read(i);
     DONT_OPTIMIZE(block);
     std::this_thread::sleep_for(std::chrono::microseconds(100));
